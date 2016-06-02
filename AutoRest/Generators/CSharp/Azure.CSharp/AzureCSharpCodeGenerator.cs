@@ -25,7 +25,7 @@ namespace Microsoft.Rest.Generator.CSharp.Azure
 
         public AzureCSharpCodeGenerator(Settings settings) : base(settings)
         {
-            _namer = new AzureCSharpCodeNamer(settings);
+            _namer = new AzureCSharpCodeNamer();
             IsSingleFileGenerationSupported = true;
             pageClasses = new Dictionary<KeyValuePair<string, string>, string>();
         }
@@ -71,7 +71,7 @@ namespace Microsoft.Rest.Generator.CSharp.Azure
             {
                 foreach (var model in serviceClient.ModelTypes)
                 {
-                    if (model.Extensions.ContainsKey(AzureExtensions.AzureResourceExtension) && 
+                    if (model.Extensions.ContainsKey(AzureExtensions.AzureResourceExtension) &&
                         (bool)model.Extensions[AzureExtensions.AzureResourceExtension])
                     {
                         model.BaseModelType = new CompositeType { Name = "IResource", SerializedName = "IResource" };
@@ -139,8 +139,8 @@ namespace Microsoft.Rest.Generator.CSharp.Azure
             // Models
             foreach (var model in serviceClient.ModelTypes.Concat(serviceClient.HeaderTypes))
             {
-                if (model.Extensions.ContainsKey(AzureExtensions.ExternalExtension) && 
-                    (bool) model.Extensions[AzureExtensions.ExternalExtension])
+                if (model.Extensions.ContainsKey(AzureExtensions.ExternalExtension) &&
+                    (bool)model.Extensions[AzureExtensions.ExternalExtension])
                 {
                     continue;
                 }

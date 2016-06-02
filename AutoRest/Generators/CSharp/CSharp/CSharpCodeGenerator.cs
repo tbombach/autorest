@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Rest.Generator.ClientModel;
 using Microsoft.Rest.Generator.CSharp.Templates;
 using System.Linq;
+using System;
 
 namespace Microsoft.Rest.Generator.CSharp
 {
@@ -18,8 +19,27 @@ namespace Microsoft.Rest.Generator.CSharp
 
         public CSharpCodeGenerator(Settings settings) : base(settings)
         {
-            _namer = new CSharpCodeNamer();
+            _namer = new CSharpCodeNamer() { UseDateTimeOffset = ShouldUseDateTimeOffset(settings) };
             IsSingleFileGenerationSupported = true;
+        }
+
+        private static bool ShouldUseDateTimeOffset(Settings settings)
+        {
+            if (settings != null && settings.CustomSettings != null)
+            {
+                foreach (var setting in settings.CustomSettings.Keys)
+                {
+                    if (setting.Equals("useDateTimeOffset", StringComparison.OrdinalIgnoreCase))
+                    {
+                        bool toUse;
+                        if (bool.TryParse(settings.CustomSettings[setting], out toUse))
+                        {
+                            return toUse;
+                        }
+                    }
+                }
+            }
+            return false;
         }
 
         /// <summary>
@@ -36,6 +56,9 @@ namespace Microsoft.Rest.Generator.CSharp
         [SettingsAlias("syncMethods")]
         public SyncMethodsGenerationMode SyncMethods { get; set; }
 
+        [SettingsInfo("Indicates whether to use DateTimeOffset instead of DateTime to model date-time types")]
+        public bool UseDateTimeOffset { get; set; }
+
         public override string Name
         {
             get { return "CSharp"; }
@@ -49,7 +72,8 @@ namespace Microsoft.Rest.Generator.CSharp
 
         public override string UsageInstructions
         {
-            get {
+            get
+            {
                 return string.Format(CultureInfo.InvariantCulture,
                     Properties.Resources.UsageInformation, ClientRuntimePackage);
             }
