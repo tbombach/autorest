@@ -39,7 +39,6 @@ namespace Microsoft.Rest.Generator.Cli
             }
         };
 
-
         /// <summary>
         /// Generates help string based on the passed in template.
         /// <para>
@@ -82,9 +81,37 @@ namespace Microsoft.Rest.Generator.Cli
                 throw new ArgumentNullException("template");
             }
 
+            // Parse autorest.json
+            AutoRestConfiguration autorestConfig = new AutoRestConfiguration();
+            string configurationFile = ExtensionsLoader.GetConfigurationFileContent(settings);
+            if (configurationFile != null)
+            {
+                try
+                {
+                    autorestConfig = JsonConvert.DeserializeObject<AutoRestConfiguration>(configurationFile);
+                }
+                catch
+                {
+                    // Ignore
+                }
+            }
+
             // Reflect over properties in Settings to get documentation content
+            var unifiedSettingsProperties = typeof(Settings).GetProperties().ToList();
+            try
+            {
+                // Reflect over properties in the specified CodeGenerator and add them to our list of properties
+                var codeGenerator = ExtensionsLoader.LoadTypeFromAssembly<CodeGenerator>(autorestConfig.CodeGenerators, settings.CodeGenerator, settings);
+                unifiedSettingsProperties.AddRange(codeGenerator.GetType().GetProperties());
+            }
+            catch
+            {
+                // If an invalid generator is specified, we will continue showing the generic help
+            }
+
+            // Get the SettingsInfo for all of the generic and generator properties
             var parameters = new List<Tuple<string, SettingsInfoAttribute>>();
-            foreach (PropertyInfo property in typeof(Settings).GetProperties())
+            foreach (PropertyInfo property in unifiedSettingsProperties)
             {
                 var doc = property.GetCustomAttributes<SettingsInfoAttribute>().FirstOrDefault();
 
@@ -96,6 +123,7 @@ namespace Microsoft.Rest.Generator.Cli
 
             // Generate usage syntax
             var syntaxSection = new StringBuilder("autorest ");
+
             foreach (var parameter in parameters.OrderBy(t => t.Item1).OrderByDescending(t => t.Item2.IsRequired))
             {
                 if (parameter.Item2.IsRequired)
@@ -112,7 +140,7 @@ namespace Microsoft.Rest.Generator.Cli
             var parametersSection = new StringBuilder();
             const string parametersPattern = @"\$parameters-start\$(.+)\$parameters-end\$";
             var parameterTemplate = Regex.Match(template, parametersPattern, RegexOptions.Singleline).Groups[1].Value.Trim();
-            foreach (PropertyInfo property in typeof(Settings).GetProperties().OrderBy(p => p.Name))
+            foreach (PropertyInfo property in unifiedSettingsProperties.OrderBy(p => p.Name))
             {
                 SettingsInfoAttribute doc = (SettingsInfoAttribute)property.GetCustomAttributes(
                     typeof(SettingsInfoAttribute)).FirstOrDefault();
@@ -120,7 +148,7 @@ namespace Microsoft.Rest.Generator.Cli
                 if (doc != null)
                 {
                     string documentation = doc.Documentation;
-                    string aliases = string.Join(", ", 
+                    string aliases = string.Join(", ",
                         property.GetCustomAttributes<SettingsAliasAttribute>().Select(a => "-" + a.Alias));
                     if (!string.IsNullOrWhiteSpace(aliases))
                     {
@@ -129,21 +157,6 @@ namespace Microsoft.Rest.Generator.Cli
                     parametersSection.AppendLine("  " + parameterTemplate.
                         Replace("$parameter$", property.Name).
                         Replace("$parameter-desc$", documentation));
-                }
-            }
-
-            // Parse autorest.json
-            AutoRestConfiguration autorestConfig = new AutoRestConfiguration();
-            string configurationFile = ExtensionsLoader.GetConfigurationFileContent(settings);
-            if (configurationFile != null)
-            {
-                try
-                {
-                    autorestConfig = JsonConvert.DeserializeObject<AutoRestConfiguration>(configurationFile);                    
-                }
-                catch
-                {
-                    // Ignore
                 }
             }
 
@@ -164,7 +177,7 @@ namespace Microsoft.Rest.Generator.Cli
                 catch
                 {
                     // Skip
-                }                
+                }
             }
 
             // Generate examples section.
