@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using AutoRest.Core.ClientModel;
 using AutoRest.Swagger.Properties;
+using AutoRest.Core.Validation;
+using AutoRest.Swagger.Validation;
+using Newtonsoft.Json;
 
 namespace AutoRest.Swagger.Model
 {
@@ -14,6 +17,10 @@ namespace AutoRest.Swagger.Model
     /// https://github.com/wordnik/swagger-spec/blob/master/versions/2.0.md#parameterObject
     /// </summary>
     [Serializable]
+    [Rule(typeof(DescriptionRequired))]
+    [Rule(typeof(EnumContainsDefault))]
+    [Rule(typeof(RefNoSiblings))]
+    [Rule(typeof(ValidFormats))]
     public abstract class SwaggerObject : SwaggerBase
     {
         public virtual bool IsRequired { get; set; }
@@ -33,11 +40,15 @@ namespace AutoRest.Swagger.Model
         /// </summary>
         public virtual Schema Items { get; set; }
 
+        [JsonProperty(PropertyName = "$ref")]
+        public string Reference { get; set; }
+
         /// <summary>
         /// Describes the type of additional properties in the data type.
         /// </summary>
         public virtual Schema AdditionalProperties { get; set; }
 
+        [Rule(typeof(DescriptiveDescriptionRequired))]
         public virtual string Description { get; set; }
 
         /// <summary>
@@ -147,7 +158,7 @@ namespace AutoRest.Swagger.Model
                     return new PrimaryType(KnownPrimaryType.Stream);
                 default:
                     throw new NotImplementedException(
-                        string.Format(CultureInfo.InvariantCulture, 
+                        string.Format(CultureInfo.InvariantCulture,
                            Resources.InvalidTypeInSwaggerSchema,
                             Type));
             }
