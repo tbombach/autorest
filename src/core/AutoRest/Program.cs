@@ -3,7 +3,6 @@
 
 using System;
 using System.Globalization;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using AutoRest.Core;
 using AutoRest.Core.Logging;
