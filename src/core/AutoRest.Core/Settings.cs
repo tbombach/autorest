@@ -52,6 +52,7 @@ Licensed under the MIT License. See License.txt in the project root for license 
             Header = string.Format(CultureInfo.InvariantCulture, DefaultCodeGenerationHeader, AutoRest.Version);
             CodeGenerator = "CSharp";
             Modeler = "Swagger";
+            ValidationLevel = LogEntrySeverity.Error;
         }
 
         /// <summary>
@@ -220,6 +221,14 @@ Licensed under the MIT License. See License.txt in the project root for license 
         [SettingsAlias("cgs")]
         [SettingsInfo("The path for a json file containing code generation settings.")]
         public string CodeGenSettings { get; set; }
+        
+        /// <summary>
+        /// The level of validation to fail the AutoRest.exe validation on
+        /// </summary>
+        [SettingsAlias("vl")]
+        [SettingsAlias("validation")]
+        public LogEntrySeverity ValidationLevel { get; set; }
+
         /// <summary>
         /// Factory method to generate CodeGenerationSettings from command line arguments.
         /// Matches dictionary keys to the settings properties.
