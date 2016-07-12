@@ -21,13 +21,14 @@ namespace AutoRest.Core.Validation
 
         public IEnumerable<ValidationMessage> GetValidationExceptions(object entity)
         {
-            return RecursiveValidate(entity, new List<RuleAttribute>());
+            return RecursiveValidate(entity, new Node(entity), new List<RuleAttribute>());
         }
 
-        private IEnumerable<ValidationMessage> RecursiveValidate(object entity, IEnumerable<RuleAttribute> collectionRules)
+        private IEnumerable<ValidationMessage> RecursiveValidate(object entity, Node parent, IEnumerable<RuleAttribute> collectionRules)
         {
             if (entity != null)
             {
+                var node = new Node(entity, parent);
                 if (entity is IList)
                 {
                     // Recursively validate each list item and add the item index to the location of each validation message
@@ -36,7 +37,7 @@ namespace AutoRest.Core.Validation
                     {
                         for (int i = 0; i < list.Count; i++)
                         {
-                            foreach (ValidationMessage exception in RecursiveValidate(list[i], collectionRules))
+                            foreach (ValidationMessage exception in RecursiveValidate(list[i], node, collectionRules))
                             {
                                 exception.Path.Add($"[{i}]");
                                 yield return exception;
@@ -52,7 +53,7 @@ namespace AutoRest.Core.Validation
                     {
                         foreach (var pair in dict)
                         {
-                            foreach (ValidationMessage exception in RecursiveValidate(pair.Value, collectionRules))
+                            foreach (ValidationMessage exception in RecursiveValidate(pair.Value, node, collectionRules))
                             {
                                 exception.Path.Add(pair.Key);
                                 yield return exception;
@@ -63,11 +64,11 @@ namespace AutoRest.Core.Validation
                 else if (entity.GetType().IsClass && entity.GetType() != typeof(string))
                 {
                     // Validate objects by running class rules against the object and recursively against properties
-                    foreach(var exception in ValidateObjectValue(entity, collectionRules))
+                    foreach(var exception in ValidateObjectValue(entity, node, collectionRules))
                     {
                         yield return exception;
                     }
-                    foreach(var exception in ValidateObjectProperties(entity))
+                    foreach(var exception in ValidateObjectProperties(entity, parent, node))
                     {
                         yield return exception;
                     }
@@ -76,7 +77,7 @@ namespace AutoRest.Core.Validation
             yield break;
         }
 
-        private IEnumerable<ValidationMessage> ValidateObjectValue(object entity, IEnumerable<RuleAttribute> collectionRules)
+        private IEnumerable<ValidationMessage> ValidateObjectValue(object entity, Node parent, IEnumerable<RuleAttribute> collectionRules)
         {
             // Get any rules defined for the class of the entity
             var classRules = entity.GetType().GetCustomAttributes<RuleAttribute>(true);
@@ -85,10 +86,10 @@ namespace AutoRest.Core.Validation
             classRules = collectionRules.Concat(classRules);
 
             // Apply each rule for the entity
-            return classRules.SelectMany(rule => rule.GetValidationMessages(entity));
+            return classRules.SelectMany(rule => rule.GetValidationMessages(entity, parent));
         }
 
-        private IEnumerable<ValidationMessage> ValidateObjectProperties(object entity)
+        private IEnumerable<ValidationMessage> ValidateObjectProperties(object entity, Node parent, Node node)
         {
             // Go through each validatable property
             foreach (var prop in entity.GetValidatableProperties())
@@ -100,7 +101,7 @@ namespace AutoRest.Core.Validation
                 var propertyRules = prop.GetCustomAttributes<RuleAttribute>(true);
                 foreach (var rule in propertyRules)
                 {
-                    foreach (var exception in rule.GetValidationMessages(value))
+                    foreach (var exception in rule.GetValidationMessages(value, parent))
                     {
                         exception.Path.Add(prop.Name);
                         yield return exception;
@@ -109,7 +110,7 @@ namespace AutoRest.Core.Validation
 
                 // Recursively validate the value of the property (passing any rules to inherit)
                 var inheritableRules = prop.GetCustomAttributes<CollectionRuleAttribute>(true);
-                foreach (var exception in RecursiveValidate(value, inheritableRules))
+                foreach (var exception in RecursiveValidate(value, node, inheritableRules))
                 {
                     exception.Path.Add(prop.Name);
                     yield return exception;

@@ -438,7 +438,7 @@ namespace AutoRest.Core.Properties {
         }
         
         /// <summary>
-        ///    Looks up a localized string similar to Operations can not have more than one &apos;body&apos; parameter. The following were found: &apos;{0}&apos;.
+        ///    Looks up a localized string similar to Operations may have more than one &apos;body&apos; parameter. The following were found: &apos;{0}&apos;.
         /// </summary>
         public static string TooManyBodyParameters {
             get {

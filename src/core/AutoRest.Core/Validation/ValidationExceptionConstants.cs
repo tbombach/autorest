@@ -36,6 +36,7 @@ namespace AutoRest.Core.Validation
             {
                 { ValidationExceptionName.DefaultMustBeInEnum, Resources.InvalidDefault },
                 { ValidationExceptionName.OneUnderscoreInOperationId, Resources.OnlyOneUnderscoreAllowedInOperationId },
+                { ValidationExceptionName.OneBodyParameterPermitted, Resources.TooManyBodyParameters },
             };
         }
     }

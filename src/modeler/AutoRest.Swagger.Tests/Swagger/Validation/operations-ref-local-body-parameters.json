@@ -1,0 +1,63 @@
+﻿{
+  "swagger": "2.0",
+  "info": {
+    "title": "Operation with multiple body parameters",
+    "description": "Some documentation.",
+    "version": "2014-04-01-preview"
+  },
+  "host": "management.azure.com",
+  "schemes": [
+    "https"
+  ],
+  "basePath": "/",
+  "produces": [
+    "application/json"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "paths": {
+    "/foo": {
+      "post": {
+        "operationId": "PostFoo",
+        "summary": "Foo path",
+        "description": "Foo POST operation",
+        "parameters": [
+          {
+            "$ref": "#/parameters/BodyFoo"
+          },
+          {
+            "name": "BodyBar",
+            "in": "body",
+            "required": true,
+            "description": "Bar parameter in body",
+            "schema": {
+              "$ref": "#/definitions/BodyParam"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "BodyFoo": {
+      "name": "BodyFoo",
+      "in": "body",
+      "description": "Foo parameter in body",
+      "required": true,
+      "schema": {
+        "$ref": "#/definitions/BodyParam"
+      }
+    }
+  },
+  "definitions": {
+    "BodyParam": {
+      "description": "Test"
+    }
+  }
+}

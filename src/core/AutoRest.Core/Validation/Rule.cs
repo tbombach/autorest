@@ -14,9 +14,7 @@ namespace AutoRest.Core.Validation
     /// </summary>
     public abstract class Rule
     {
-        protected Rule()
-        {
-        }
+        public Node Parent { get; set; }
 
         /// <summary>
         /// The name of the exception that describes this rule

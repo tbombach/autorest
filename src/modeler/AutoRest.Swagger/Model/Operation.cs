@@ -57,6 +57,7 @@ namespace AutoRest.Swagger.Model
         /// new definition will override it, but can never remove it.
         /// </summary>
         [CollectionRule(typeof(AnonymousParameterTypes))]
+        [Rule(typeof(OneBodyParameter))]
         public IList<SwaggerParameter> Parameters { get; set; }
 
         /// <summary>

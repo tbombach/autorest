@@ -15,14 +15,9 @@ namespace AutoRest.Core.Validation
     {
         public Type RuleType { get; }
 
-        private Rule Rule;
-
         public RuleAttribute(Type ruleType)
         {
-            if (typeof(Rule).IsAssignableFrom(ruleType))
-            {
-                Rule = (Rule)Activator.CreateInstance(ruleType);
-            }
+            this.RuleType = ruleType;
         }
 
         /// <summary>
@@ -30,16 +25,20 @@ namespace AutoRest.Core.Validation
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public virtual IEnumerable<ValidationMessage> GetValidationMessages(object entity)
+        public virtual IEnumerable<ValidationMessage> GetValidationMessages(object entity, Node parent)
         {
-            if (Rule != null)
+            if (typeof(Rule).IsAssignableFrom(this.RuleType))
             {
-                foreach(var message in Rule.GetValidationMessages(entity))
+                var rule = (Rule)Activator.CreateInstance(RuleType);
+                rule.Parent = parent;
+                if (rule != null)
                 {
-                    yield return message;
+                    foreach (var message in rule.GetValidationMessages(entity))
+                    {
+                        yield return message;
+                    }
                 }
             }
-            yield break;
         }
     }
 }

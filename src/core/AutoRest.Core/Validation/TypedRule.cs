@@ -11,10 +11,6 @@ namespace AutoRest.Core.Validation
     /// <typeparam name="T">The type of the object to validate</typeparam>
     public abstract class TypedRule<T> : Rule where T : class
     {
-        protected TypedRule()
-        {
-        }
-
         public sealed override IEnumerable<ValidationMessage> GetValidationMessages(object entity)
         {
             var typedEntity = entity as T;

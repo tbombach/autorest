@@ -109,5 +109,26 @@ namespace AutoRest.Swagger.Tests
             var messages = ValidateSwagger(Path.Combine("Swagger", "Validation", "xms-path-not-in-paths.json"));
             messages.AssertOnlyValidationMessage(ValidationExceptionName.XmsPathsMustOverloadPaths);
         }
+
+        [Fact]
+        public void OnlyOneBodyParameterValidation()
+        {
+            var messages = ValidateSwagger(Path.Combine("Swagger", "Validation", "operations-multiple-body-parameters.json"));
+            messages.AssertOnlyValidationMessage(ValidationExceptionName.OneBodyParameterPermitted);
+        }
+
+        [Fact]
+        public void ReferencedGlobalBodyParamAndLocalBodyParamValidation()
+        {
+            var messages = ValidateSwagger(Path.Combine("Swagger", "Validation", "operations-ref-local-body-parameters.json"));
+            messages.AssertOnlyValidationMessage(ValidationExceptionName.OneBodyParameterPermitted);
+        }
+
+        [Fact]
+        public void ReferencedMultipleGlobalBodyParams()
+        {
+            var messages = ValidateSwagger(Path.Combine("Swagger", "Validation", "operations-multiple-ref-body-parameters.json"));
+            messages.AssertOnlyValidationMessage(ValidationExceptionName.OneBodyParameterPermitted);
+        }
     }
 }

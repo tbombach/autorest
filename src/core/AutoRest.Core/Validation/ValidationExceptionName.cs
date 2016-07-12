@@ -17,5 +17,6 @@ namespace AutoRest.Core.Validation
         XmsPathsMustOverloadPaths,
         DescriptiveDescription,
         OperationIdNounsNotInVerbs,
+        OneBodyParameterPermitted,
     }
 }
