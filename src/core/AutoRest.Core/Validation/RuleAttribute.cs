@@ -25,12 +25,12 @@ namespace AutoRest.Core.Validation
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public virtual IEnumerable<ValidationMessage> GetValidationMessages(object entity, Node parent)
+        public virtual IEnumerable<ValidationMessage> GetValidationMessages(object entity, RuleContext context)
         {
             if (typeof(Rule).IsAssignableFrom(this.RuleType))
             {
                 var rule = (Rule)Activator.CreateInstance(RuleType);
-                rule.Parent = parent;
+                rule.Context = context;
                 if (rule != null)
                 {
                     foreach (var message in rule.GetValidationMessages(entity))

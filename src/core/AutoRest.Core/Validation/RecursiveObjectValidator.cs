@@ -15,108 +15,106 @@ namespace AutoRest.Core.Validation
     /// </summary>
     public class RecursiveObjectValidator
     {
-        public RecursiveObjectValidator()
+        private object RootEntity;
+
+        public RecursiveObjectValidator(object entity)
         {
+            RootEntity = entity;
         }
 
-        public IEnumerable<ValidationMessage> GetValidationExceptions(object entity)
+        public IEnumerable<ValidationMessage> GetValidationExceptions()
         {
-            return RecursiveValidate(entity, new Node(entity), new List<RuleAttribute>());
+            var rootRuleContext = new RuleContext(RootEntity);
+            return RecursiveValidate(RootEntity, new TraversalDepth(rootRuleContext));
         }
 
-        private IEnumerable<ValidationMessage> RecursiveValidate(object entity, Node parent, IEnumerable<RuleAttribute> collectionRules)
+        private IEnumerable<ValidationMessage> ValidateListItem(dynamic item, int index, TraversalDepth parentLevel)
         {
-            if (entity != null)
-            {
-                var node = new Node(entity, parent);
-                if (entity is IList)
-                {
-                    // Recursively validate each list item and add the item index to the location of each validation message
-                    IList<dynamic> list = ((IList)entity).Cast<dynamic>().ToList();
-                    if (list != null)
-                    {
-                        for (int i = 0; i < list.Count; i++)
-                        {
-                            foreach (ValidationMessage exception in RecursiveValidate(list[i], node, collectionRules))
-                            {
-                                exception.Path.Add($"[{i}]");
-                                yield return exception;
-                            }
-                        }
-                    }
-                }
-                else if (entity is IDictionary)
-                {
-                    // Recursively validate each dictionary entry and add the entry key to the location of each validation message
-                    IDictionary<string, dynamic> dict = ((IDictionary)entity).Cast<dynamic>().ToDictionary(entry => (string)entry.Key, entry => entry.Value);
-                    if (dict != null && entity.IsValidatableDictionary())
-                    {
-                        foreach (var pair in dict)
-                        {
-                            foreach (ValidationMessage exception in RecursiveValidate(pair.Value, node, collectionRules))
-                            {
-                                exception.Path.Add(pair.Key);
-                                yield return exception;
-                            }
-                        }
-                    }
-                }
-                else if (entity.GetType().IsClass && entity.GetType() != typeof(string))
-                {
-                    // Validate objects by running class rules against the object and recursively against properties
-                    foreach(var exception in ValidateObjectValue(entity, node, collectionRules))
-                    {
-                        yield return exception;
-                    }
-                    foreach(var exception in ValidateObjectProperties(entity, parent, node))
-                    {
-                        yield return exception;
-                    }
-                }
-            }
-            yield break;
+            var ruleContext = new RuleContext(parentLevel.RuleContext) { Index = index };
+            var currentDepth = new TraversalDepth(ruleContext, parentLevel.CollectionRules);
+            return RecursiveValidate(item, currentDepth);
         }
 
-        private IEnumerable<ValidationMessage> ValidateObjectValue(object entity, Node parent, IEnumerable<RuleAttribute> collectionRules)
+        private IEnumerable<ValidationMessage> ValidateDictionaryEntry(KeyValuePair<string, dynamic> kvp, TraversalDepth parentLevel)
+        {
+            var ruleContext = new RuleContext(parentLevel.RuleContext) { Key = kvp.Key };
+            var currentLevel = new TraversalDepth(ruleContext, parentLevel.CollectionRules);
+            return RecursiveValidate(kvp.Value, currentLevel);
+        }
+
+        private IEnumerable<ValidationMessage> ValidateProp(PropertyInfo prop, object propValue, TraversalDepth parentLevel)
+        {
+            var messages = Enumerable.Empty<ValidationMessage>();
+
+            // Get any rules defined on this property and apply them to the property value
+            var propRules = prop.GetCustomAttributes<RuleAttribute>(true);
+            var collectionRules = prop.GetCustomAttributes<RuleAttribute>(true);
+
+            var ruleContext = new RuleContext(parentLevel.RuleContext) { Key = prop.Name };
+            var currentLevel = new TraversalDepth(ruleContext, collectionRules);
+
+            // Get any rules defined on this property and apply them to the property value
+            var propValueMessages = propRules.SelectMany(r => r.GetValidationMessages(propValue, currentLevel.RuleContext));
+            var propChildrenMessages = RecursiveValidate(propValue, currentLevel);
+
+            // return the messages
+            messages.Concat(propValueMessages);
+            messages.Concat(propChildrenMessages);
+            return messages;
+        }
+
+        private IEnumerable<ValidationMessage> ValidateObject(object entity, TraversalDepth currentLevel)
         {
             // Get any rules defined for the class of the entity
             var classRules = entity.GetType().GetCustomAttributes<RuleAttribute>(true);
-
             // Combine the class rules with any rules that apply to the collection that the entity is part of
-            classRules = collectionRules.Concat(classRules);
-
+            classRules = currentLevel.CollectionRules.Concat(classRules);
             // Apply each rule for the entity
-            return classRules.SelectMany(rule => rule.GetValidationMessages(entity, parent));
+            return classRules.SelectMany(rule => rule.GetValidationMessages(entity, currentLevel.RuleContext));
         }
 
-        private IEnumerable<ValidationMessage> ValidateObjectProperties(object entity, Node parent, Node node)
+        private IEnumerable<ValidationMessage> RecursiveValidate(object entity, TraversalDepth parentLevel)
         {
-            // Go through each validatable property
-            foreach (var prop in entity.GetValidatableProperties())
+            var messages = Enumerable.Empty<ValidationMessage>();
+            if (entity != null)
             {
-                // Get the value of the property from the entity
-                var value = prop.GetValue(entity);
-
-                // Get any rules defined on this property and apply them to the property value
-                var propertyRules = prop.GetCustomAttributes<RuleAttribute>(true);
-                foreach (var rule in propertyRules)
+                if (entity is IList)
                 {
-                    foreach (var exception in rule.GetValidationMessages(value, parent))
-                    {
-                        exception.Path.Add(prop.Name);
-                        yield return exception;
-                    }
+                    // Transform the object into a list we can work with
+                    IList<dynamic> list = ((IList)entity).Cast<dynamic>().ToList();
+
+                    // Validate each list item
+                    var listMessages = list?.SelectMany<dynamic, ValidationMessage>((l, i) => ValidateListItem(l, i, parentLevel));
+
+                    // Add the messages from the list items to our result
+                    messages = messages.Concat(listMessages ?? Enumerable.Empty<ValidationMessage>());
                 }
-
-                // Recursively validate the value of the property (passing any rules to inherit)
-                var inheritableRules = prop.GetCustomAttributes<CollectionRuleAttribute>(true);
-                foreach (var exception in RecursiveValidate(value, node, inheritableRules))
+                else if (entity is IDictionary)
                 {
-                    exception.Path.Add(prop.Name);
-                    yield return exception;
+                    // Transform the object into a dictionary we can work with
+                    IDictionary<string, dynamic> dict = ((IDictionary)entity).Cast<dynamic>().ToDictionary(entry => (string)entry.Key, entry => entry.Value);
+
+                    // Validate each dictionary entry
+                    var dictMessages = dict?.SelectMany(k => ValidateDictionaryEntry(k, parentLevel)).ToList();
+
+                    // Add the messages from the dictionary entry to our result
+                    messages = messages.Concat(dictMessages ?? Enumerable.Empty<ValidationMessage>());
+                }
+                else if (entity.GetType().IsClass && entity.GetType() != typeof(string))
+                {
+                    // Get all of the properties of the object to validate
+                    var properties = entity.GetValidatableProperties();
+
+                    // Validate each of the properties and the object value itself
+                    var propertiesMessages = properties.SelectMany(prop => ValidateProp(prop, prop.GetValue(entity), parentLevel));
+                    var entityMessages = ValidateObject(entity, parentLevel);
+
+                    // Add the messages from the object and its properties to the result
+                    messages = messages.Concat(entityMessages);
+                    messages = messages.Concat(propertiesMessages);
                 }
             }
-            yield break;
+            return messages;
         }
     }
 
@@ -131,13 +129,10 @@ namespace AutoRest.Core.Validation
         /// <returns></returns>
         internal static IEnumerable<PropertyInfo> GetValidatableProperties(this object entity)
         {
-            if (entity == null)
-            {
-                return new List<PropertyInfo>();
-            }
-            return entity.GetType().GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance)
+            var properties = entity?.GetType().GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance)
                          .Where(prop => !Attribute.IsDefined(prop, JsonExtensionDataType))
                          .Where(prop => prop.PropertyType != typeof(object));
+            return properties ?? Enumerable.Empty<PropertyInfo>();
         }
 
         /// <summary>
@@ -159,5 +154,4 @@ namespace AutoRest.Core.Validation
                    dictType.GenericTypeArguments[1] != typeof(object);
         }
     }
-
 }

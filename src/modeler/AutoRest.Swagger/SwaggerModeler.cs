@@ -75,8 +75,8 @@ namespace AutoRest.Swagger
             ServiceDefinition = SwaggerParser.Load(Settings.Input, Settings.FileSystem);
 
             // Look for semantic errors and warnings in the document.
-            var validator = new RecursiveObjectValidator();
-            messages = validator.GetValidationExceptions(ServiceDefinition).ToList();
+            var validator = new RecursiveObjectValidator(ServiceDefinition);
+            messages = validator.GetValidationExceptions().ToList();
 
             Logger.LogInfo(Resources.GeneratingClient);
             // Update settings

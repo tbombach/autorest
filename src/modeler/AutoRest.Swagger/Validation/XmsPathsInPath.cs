@@ -9,15 +9,17 @@ using System.Linq;
 namespace AutoRest.Swagger.Validation
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Xms")]
-    public class XmsPathsInPath : TypedRule<ServiceDefinition>
+    public class XmsPathsInPath : TypedRule<Dictionary<string, Operation>>
     {
-        public override IEnumerable<ValidationMessage> GetValidationMessages(ServiceDefinition entity)
+        public override IEnumerable<ValidationMessage> GetValidationMessages(Dictionary<string, Operation> entity)
         {
-            return entity?.CustomPaths?.Keys
-              .Where(customPath => !entity.Paths.ContainsKey(GetBasePath(customPath)))
-              .Select(basePath => CreateException(Exception, basePath))
+            //this.GetServiceDefinition
+            //return entity?.CustomPaths?.Keys
+            //  .Where(customPath => !entity.Paths.ContainsKey(GetBasePath(customPath)))
+            //  .Select(basePath => CreateException(Exception, basePath))
 
-              ?? Enumerable.Empty<ValidationMessage>();
+            //  ?? Enumerable.Empty<ValidationMessage>();
+            return null;
         }
 
         private static string GetBasePath(string customPath)
