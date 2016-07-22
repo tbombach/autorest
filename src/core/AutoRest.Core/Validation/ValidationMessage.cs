@@ -58,6 +58,6 @@ namespace AutoRest.Core.Validation
             return this;
         }
 
-        public override string ToString() => $"{Type.Name}: {Message}\n    Location: Path: {string.Join("->", Path.Reverse())}";
+        public override string ToString() => $"{Type.Name}: {Message}\n    Location: Path: {string.Join("/", Path.Reverse())}";
     }
 }

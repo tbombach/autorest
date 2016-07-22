@@ -15,9 +15,11 @@ namespace AutoRest.Core.Validation
     /// </summary>
     public class RecursiveObjectValidator
     {
+        private const string ROOT_PATH_INDICATOR = "#";
+
         public IEnumerable<ValidationMessage> GetValidationExceptions(object entity)
         {
-            return RecursiveValidate(entity, Enumerable.Empty<Rule>());
+            return RecursiveValidate(entity, Enumerable.Empty<Rule>()).Select(m => m.AppendToPath(ROOT_PATH_INDICATOR));
         }
 
         private IEnumerable<ValidationMessage> RecursiveValidate(object entity, IEnumerable<Rule> rules)
@@ -58,8 +60,14 @@ namespace AutoRest.Core.Validation
             // if this is a class, validate it's value and it's properties.
             if (entity.GetType().IsClass && entity.GetType() != typeof(string))
             {
-                // return the messages for both this value and its properties.
-                return ValidateObjectValue(entity, collectionRules).Concat(ValidateObjectProperties(entity));
+                // Validate each property of the object
+                var propertyMessages = entity.GetValidatableProperties().SelectMany(p => ValidateProperty(p, p.GetValue(entity)));
+
+                // Validate the value of the object itself
+                var valueMessages = ValidateObjectValue(entity, collectionRules);
+
+                // Return the messages for both this value and its properties.
+                return valueMessages.Concat(propertyMessages);
             }
 
             // validate just the value.
@@ -79,57 +87,19 @@ namespace AutoRest.Core.Validation
             return classRules.SelectMany(rule => rule.GetValidationMessages(entity));
         }
 
-        private IEnumerable<ValidationMessage> ValidateObjectProperties(object entity)
+        private IEnumerable<ValidationMessage> ValidateProperty(PropertyInfo prop, object value)
         {
-            // Go through each validatable property
-            foreach (var prop in entity.GetValidatableProperties())
-            {
-                // Get the value of the property from the entity
-                var value = prop.GetValue(entity);
+            // Get any rules defined on this property and any defined as applying to the collection
+            var propertyRules = prop.GetValidationRules();
+            var collectionRules = prop.GetValidationCollectionRules();
 
-                // Get any rules defined on this property and apply them to the property value
-                var propertyRules = prop.GetValidationRules().ReEnumerable();
+            // Validate the value of this property against any rules for it
+            var propertyMessages = propertyRules.SelectMany(r => r.GetValidationMessages(value)).Select(e => e.AppendToPath(prop.Name));
 
-                // if the property has no defined rules, let's supply some defaults
-                if (propertyRules.IsNullOrEmpty())
-                {
-                    propertyRules = DefaultRules.ReEnumerable();
-                }
+            // Recursively validate the children of the property (passing any rules that apply to this collection)
+            var childrenMessages = RecursiveValidate(value, collectionRules).Select(e => e.AppendToPath(prop.Name));
 
-                // add universal property rules
-                propertyRules = propertyRules.Concat(UniversalRules).ReEnumerable();
-
-                foreach (var rule in propertyRules)
-                {
-                    foreach (var exception in rule.GetValidationMessages(value))
-                    {
-                        exception.Path.Add(prop.Name);
-                        yield return exception;
-                    }
-                }
-
-                // Recursively validate the value of the property (passing any rules to inherit)
-                var inheritableRules = prop.GetValidationColletionRules().Concat(UniversalRules).ReEnumerable();
-                foreach (var exception in RecursiveValidate(value, inheritableRules))
-                {
-                    exception.Path.Add(prop.Name);
-                    yield return exception;
-                }
-            }
+            return propertyMessages.Concat(childrenMessages);
         }
-
-        /// <summary>
-        ///     The collection of default rules applies to all properties that do not define rules
-        ///     These can impose global conditions on any property that has not been otherwise validated.
-        /// </summary>
-        /// <returns></returns>
-        public static IEnumerable<Rule> DefaultRules = new[] { new MissingValidator() };
-
-        /// <summary>
-        ///     The collection of rules that apply to all properties regardless of other rules.
-        /// </summary>
-        public static IEnumerable<Rule> UniversalRules = new[] { new NoControlCharacters() };
-
-
     }
 }
