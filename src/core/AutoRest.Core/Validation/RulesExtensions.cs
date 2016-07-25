@@ -56,7 +56,6 @@ namespace AutoRest.Core.Validation
                 propertyRules = DefaultRules.ReEnumerable();
             }
             return propertyRules.Concat(UniversalRules).ReEnumerable();
-
         }
 
         public static IEnumerable<Rule> GetValidationCollectionRules(this PropertyInfo property)

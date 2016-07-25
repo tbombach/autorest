@@ -5,8 +5,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using AutoRest.Core.Utilities;
 using AutoRest.Core.Utilities.Collections;
+using System;
 
 namespace AutoRest.Core.Validation
 {
@@ -16,6 +16,24 @@ namespace AutoRest.Core.Validation
     public class RecursiveObjectValidator
     {
         private const string ROOT_PATH_INDICATOR = "#";
+
+        private Func<PropertyInfo, string> resolver;
+
+        /// <summary>
+        /// Initializes the object validator. By default, it will use the property name when
+        /// returning the location of messages
+        /// </summary>
+        public RecursiveObjectValidator() : this(PropertyNameResolver.PropertyName) { }
+
+        /// <summary>
+        /// Initializes the object validator with a custom <paramref name="resolver"/>
+        /// that returns the name for a property when setting the location of messages
+        /// </summary>
+        /// <param name="resolver">A function that resolves the name of a property</param>
+        public RecursiveObjectValidator(Func<PropertyInfo, string> resolver)
+        {
+            this.resolver = resolver;
+        }
 
         public IEnumerable<ValidationMessage> GetValidationExceptions(object entity)
         {
@@ -96,15 +114,18 @@ namespace AutoRest.Core.Validation
 
         private IEnumerable<ValidationMessage> ValidateProperty(PropertyInfo prop, object value, RuleContext parentContext)
         {
+            // Uses the property name resolver to get the name to use in the path of messages
+            var propName = resolver(prop);
+
             // Get any rules defined on this property and any defined as applying to the collection
             var propertyRules = prop.GetValidationRules();
             var collectionRules = prop.GetValidationCollectionRules();
 
             // Validate the value of this property against any rules for it
-            var propertyMessages = propertyRules.SelectMany(r => r.GetValidationMessages(value, parentContext)).Select(e => e.AppendToPath(prop.Name));
+            var propertyMessages = propertyRules.SelectMany(r => r.GetValidationMessages(value, parentContext)).Select(e => e.AppendToPath(propName));
 
             // Recursively validate the children of the property (passing any rules that apply to this collection)
-            var childrenMessages = RecursiveValidate(value, parentContext.CreateChild(value, prop.Name), collectionRules).Select(e => e.AppendToPath(prop.Name));
+            var childrenMessages = RecursiveValidate(value, parentContext.CreateChild(value, propName), collectionRules).Select(e => e.AppendToPath(propName));
 
             return propertyMessages.Concat(childrenMessages);
         }
