@@ -244,7 +244,7 @@
     <value>There is no default response defined in the responses section</value>
   </data>
   <data name="XMSPathBaseNotInPaths" xml:space="preserve">
-    <value>The path '{0}' in x-ms-paths does not overload a normal path in the paths section.</value>
+    <value>Paths in x-ms-paths must overload a normal path in the paths section.</value>
   </data>
   <data name="DescriptionNotDescriptive" xml:space="preserve">
     <value>The value provided for description is not descriptive enough.</value>

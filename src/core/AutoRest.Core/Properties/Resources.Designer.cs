@@ -456,7 +456,7 @@ namespace AutoRest.Core.Properties {
         }
         
         /// <summary>
-        ///    Looks up a localized string similar to The path &apos;{0}&apos; in x-ms-paths does not overload a normal path in the paths section..
+        ///    Looks up a localized string similar to Paths in x-ms-paths must overload a normal path in the paths section..
         /// </summary>
         public static string XMSPathBaseNotInPaths {
             get {
