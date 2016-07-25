@@ -438,6 +438,15 @@ namespace AutoRest.Core.Properties {
         }
         
         /// <summary>
+        ///    Looks up a localized string similar to To generate better code, consider applying the x-ms-client-flatten extension to avoid overly nested properties..
+        /// </summary>
+        public static string PropertiesUnnecessarilyNested {
+            get {
+                return ResourceManager.GetString("PropertiesUnnecessarilyNested", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///    Looks up a localized string similar to Operations can not have more than one &apos;body&apos; parameter. The following were found: &apos;{0}&apos;.
         /// </summary>
         public static string TooManyBodyParameters {

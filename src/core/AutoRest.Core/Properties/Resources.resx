@@ -252,4 +252,7 @@
   <data name="OperationIdNounInVerb" xml:space="preserve">
     <value>Per the Noun_Verb convention for Operation Ids, the noun '{0}' should not appear after the underscore.</value>
   </data>
+  <data name="PropertiesUnnecessarilyNested" xml:space="preserve">
+    <value>To generate better code, consider applying the x-ms-client-flatten extension to avoid overly nested properties.</value>
+  </data>
 </root>

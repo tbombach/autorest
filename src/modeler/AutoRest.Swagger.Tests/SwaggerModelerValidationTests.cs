@@ -127,5 +127,12 @@ namespace AutoRest.Swagger.Tests
             var messages = ValidateSwagger(Path.Combine("Swagger", "Validation", "xms-path-not-in-paths.json"));
             messages.AssertOnlyValidationMessage(typeof(XmsPathsMustOverloadPaths));
         }
+
+        [Fact]
+        public void NestedPropertiesValidation()
+        {
+            var messages = ValidateSwagger(Path.Combine("Swagger", "Validation", "nested-properties.json"));
+            messages.AssertOnlyValidationMessage(typeof(AvoidNestedProperties));
+        }
     }
 }
