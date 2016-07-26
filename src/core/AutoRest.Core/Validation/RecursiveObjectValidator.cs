@@ -114,16 +114,17 @@ namespace AutoRest.Core.Validation
             // Uses the property name resolver to get the name to use in the path of messages
             var propName = resolver(prop);
             var shouldTraverseObject = prop.IsTraversableProperty();
+            var ruleContext = parentContext.CreateChild(value, propName);
 
             // Get any rules defined on this property and any defined as applying to the collection
             var propertyRules = prop.GetValidationRules();
             var collectionRules = prop.GetValidationCollectionRules();
 
             // Validate the value of this property against any rules for it
-            var propertyMessages = propertyRules.SelectMany(r => r.GetValidationMessages(value, parentContext)).Select(e => e.AppendToPath(propName));
+            var propertyMessages = propertyRules.SelectMany(r => r.GetValidationMessages(value, ruleContext)).Select(e => e.AppendToPath(propName));
 
             // Recursively validate the children of the property (passing any rules that apply to this collection)
-            var childrenMessages = RecursiveValidate(value, parentContext.CreateChild(value, propName), collectionRules, shouldTraverseObject).Select(e => e.AppendToPath(propName));
+            var childrenMessages = RecursiveValidate(value, ruleContext, collectionRules, shouldTraverseObject).Select(e => e.AppendToPath(propName));
 
             return propertyMessages.Concat(childrenMessages);
         }
