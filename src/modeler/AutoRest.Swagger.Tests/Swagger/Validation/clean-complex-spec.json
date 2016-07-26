@@ -227,6 +227,16 @@
         }
       },
       "description": "An error result"
+    },
+    "Foo": {
+      "x-ms-external": true,
+      "properties": {
+        "bar": {
+          "description": "bar",
+          "type": "string",
+          "x-ms-client-name": "Baz"
+        }
+      }
     }
   }
 }
