@@ -35,6 +35,7 @@ namespace AutoRest.Swagger.Model
         /// <summary>
         /// The extending format for the previously mentioned type.
         /// </summary>
+        [Rule(typeof(ValidFormats))]
         public virtual string Format { get; set; }
 
         /// <summary>

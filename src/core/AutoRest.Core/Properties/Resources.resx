@@ -213,8 +213,8 @@
   <data name="InvalidSchemaParameter" xml:space="preserve">
     <value>Only body parameters can have a schema defined.</value>
   </data>
-  <data name="InvalidTypeFormatCombination" xml:space="preserve">
-    <value>Type {0} and format {1} is not a supported combination</value>
+  <data name="UnknownFormat" xml:space="preserve">
+    <value>'{0}' is not a known format.</value>
   </data>
   <data name="MissingDescription" xml:space="preserve">
     <value>Consider adding a 'description' element, essential for maintaining reference documentation.</value>

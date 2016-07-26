@@ -294,15 +294,6 @@ namespace AutoRest.Core.Properties {
         }
         
         /// <summary>
-        ///    Looks up a localized string similar to Type {0} and format {1} is not a supported combination.
-        /// </summary>
-        public static string InvalidTypeFormatCombination {
-            get {
-                return ResourceManager.GetString("InvalidTypeFormatCombination", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///    Looks up a localized string similar to &apos;{0}&apos; code generator does not support code generation to a single file..
         /// </summary>
         public static string LanguageDoesNotSupportSingleFileGeneration {
@@ -452,6 +443,15 @@ namespace AutoRest.Core.Properties {
         public static string TypeShouldBeAssemblyQualified {
             get {
                 return ResourceManager.GetString("TypeShouldBeAssemblyQualified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///    Looks up a localized string similar to &apos;{0}&apos; is not a known format..
+        /// </summary>
+        public static string UnknownFormat {
+            get {
+                return ResourceManager.GetString("UnknownFormat", resourceCulture);
             }
         }
         

@@ -127,5 +127,12 @@ namespace AutoRest.Swagger.Tests
             var messages = ValidateSwagger(Path.Combine("Swagger", "Validation", "xms-path-not-in-paths.json"));
             messages.AssertOnlyValidationMessage(typeof(XmsPathsMustOverloadPaths));
         }
+
+        [Fact]
+        public void InvalidFormatValidation()
+        {
+            var messages = ValidateSwagger(Path.Combine("Swagger", "Validation", "invalid-format.json"));
+            messages.AssertOnlyValidationMessage(typeof(ValidFormats));
+        }
     }
 }
