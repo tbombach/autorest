@@ -45,7 +45,7 @@ namespace AutoRest.Core.Validation
             return RecursiveValidate(entity, parentContext, Enumerable.Empty<Rule>());
         }
 
-        private IEnumerable<ValidationMessage> RecursiveValidate(object entity, RuleContext parentContext, IEnumerable<Rule> rules)
+        private IEnumerable<ValidationMessage> RecursiveValidate(object entity, RuleContext parentContext, IEnumerable<Rule> rules, bool traverseProperties = true)
         {
             var messages = Enumerable.Empty<ValidationMessage>();
             if (entity == null)
@@ -58,7 +58,7 @@ namespace AutoRest.Core.Validation
 
             var list = entity as IList;
             var dictionary = entity as IDictionary;
-            if (list != null)
+            if (traverseProperties && list != null)
             {
                 // Recursively validate each list item and add the 
                 // item index to the location of each validation message
@@ -68,23 +68,20 @@ namespace AutoRest.Core.Validation
                 messages = messages.Concat(listMessages);
             }
 
-            else if (dictionary != null)
+            else if (traverseProperties && dictionary != null)
             {
-                if (!dictionary.IsValidatableDictionary())
-                {
-                    return Enumerable.Empty<ValidationMessage>();
-                }
+                var shouldTraverseEntries = dictionary.IsTraversableDictionary();
 
                 // Recursively validate each dictionary entry and add the entry 
                 // key to the location of each validation message
                 var dictMessages = dictionary.SelectMany((key, value)
-                    => RecursiveValidate(value, parentContext.CreateChild(value, (string)key), collectionRules).Select(each
+                    => RecursiveValidate(value, parentContext.CreateChild(value, (string)key), collectionRules, shouldTraverseEntries).Select(each
                         => each.AppendToPath((string)key)));
                 messages = messages.Concat(dictMessages);
             }
 
             // If this is a class, validate its value and its properties.
-            else if (entity.GetType().IsClass && entity.GetType() != typeof(string))
+            else if (traverseProperties && entity.GetType().IsClass && entity.GetType() != typeof(string))
             {
                 // Validate each property of the object
                 var propertyMessages = entity.GetValidatableProperties()
@@ -116,6 +113,7 @@ namespace AutoRest.Core.Validation
         {
             // Uses the property name resolver to get the name to use in the path of messages
             var propName = resolver(prop);
+            var shouldTraverseObject = prop.IsTraversableProperty();
 
             // Get any rules defined on this property and any defined as applying to the collection
             var propertyRules = prop.GetValidationRules();
@@ -125,7 +123,7 @@ namespace AutoRest.Core.Validation
             var propertyMessages = propertyRules.SelectMany(r => r.GetValidationMessages(value, parentContext)).Select(e => e.AppendToPath(propName));
 
             // Recursively validate the children of the property (passing any rules that apply to this collection)
-            var childrenMessages = RecursiveValidate(value, parentContext.CreateChild(value, propName), collectionRules).Select(e => e.AppendToPath(propName));
+            var childrenMessages = RecursiveValidate(value, parentContext.CreateChild(value, propName), collectionRules, shouldTraverseObject).Select(e => e.AppendToPath(propName));
 
             return propertyMessages.Concat(childrenMessages);
         }

@@ -24,23 +24,33 @@ namespace AutoRest.Core.Validation
                 return Enumerable.Empty<PropertyInfo>();
             }
             return entity.GetType()
-                .GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance)
-                .Where(prop => !Attribute.IsDefined(prop, JsonExtensionDataType))
-                .Where(prop => prop.PropertyType != typeof(object));
+                .GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
         }
 
         /// <summary>
-        ///     Determines if a dictionary can be validated by running rules
+        /// [JsonExtension] properties and ones with type object can cause infinite recursion if recursively traversed
+        /// </summary>
+        /// <param name="prop"></param>
+        /// <returns></returns>
+        internal static bool IsTraversableProperty(this PropertyInfo prop)
+        {
+            return prop.PropertyType != typeof(object);
+        }
+
+        /// <summary>
+        /// Determines if a dictionary's elements should be recursively traversed
+        /// Dictionaries where there isn't type information for the value type should not be
+        /// traversed, since there isn't enough information to prevent infinite traversal
         /// </summary>
         /// <param name="entity">The object to check</param>
         /// <returns></returns>
-        internal static bool IsValidatableDictionary(this object entity)
+        internal static bool IsTraversableDictionary(this object entity)
         {
             if (entity == null)
             {
                 return false;
             }
-            // Dictionaries of type <string, object> cannot be validated, because the object could be infinitely deep.
+            // Dictionaries of type <string, object> cannot be traversed, because the object could be infinitely deep.
             // We only want to validate objects that have strong typing for the value type
             var dictType = entity.GetType();
             return dictType.IsGenericType &&
@@ -65,9 +75,7 @@ namespace AutoRest.Core.Validation
         }
 
         public static IEnumerable<Rule> GetValidationRules(this Type type)
-        {
-            return type.GetCustomAttributes<RuleAttribute>(true).Select(each => each.Rule).ReEnumerable();
-        }
+            => type.GetCustomAttributes<RuleAttribute>(true).Select(each => each.Rule).ReEnumerable();
 
         /// <summary>
         ///     The collection of default rules applies to all properties that do not define rules
