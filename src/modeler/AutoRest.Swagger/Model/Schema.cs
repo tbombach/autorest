@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using AutoRest.Core.Validation;
+using AutoRest.Swagger.Validation;
 using System;
 using System.Collections.Generic;
 
@@ -27,6 +29,7 @@ namespace AutoRest.Swagger.Model
         /// <summary>
         /// Key is a type serviceTypeName.
         /// </summary>
+        [CollectionRule(typeof(AvoidNestedProperties))]
         public Dictionary<string, Schema> Properties { get; set; }
 
         public bool ReadOnly { get; set; }

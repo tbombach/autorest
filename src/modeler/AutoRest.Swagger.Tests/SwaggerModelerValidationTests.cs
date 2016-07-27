@@ -134,5 +134,12 @@ namespace AutoRest.Swagger.Tests
             var messages = ValidateSwagger(Path.Combine("Swagger", "Validation", "invalid-format.json"));
             messages.AssertOnlyValidationMessage(typeof(ValidFormats));
         }
+
+        [Fact]
+        public void NestedPropertiesValidation()
+        {
+            var messages = ValidateSwagger(Path.Combine("Swagger", "Validation", "nested-properties.json"));
+            messages.AssertOnlyValidationMessage(typeof(AvoidNestedProperties));
+        }
     }
 }
