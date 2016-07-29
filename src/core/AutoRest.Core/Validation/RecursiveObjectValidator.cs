@@ -35,16 +35,24 @@ namespace AutoRest.Core.Validation
             this.resolver = resolver;
         }
 
+        /// <summary>
+        /// Recursively validates <paramref name="entity"/> by traversing all of its properties
+        /// </summary>
+        /// <param name="entity">The object to validate</param>
         public IEnumerable<ValidationMessage> GetValidationExceptions(object entity)
         {
-            return RecursiveValidate(entity, new RuleContext(entity), Enumerable.Empty<Rule>()).Select(m => m.AppendToPath(ROOT_PATH_INDICATOR));
+            return RecursiveValidate(entity, new RuleContext(entity), Enumerable.Empty<Rule>())
+                .Select(m => m.AppendToPath(ROOT_PATH_INDICATOR));
         }
 
-        private IEnumerable<ValidationMessage> RecursiveValidate(object entity, RuleContext parentContext)
-        {
-            return RecursiveValidate(entity, parentContext, Enumerable.Empty<Rule>());
-        }
-
+        /// <summary>
+        /// Recursively validates <paramref name="entity"/> by traversing all of its properties
+        /// </summary>
+        /// <param name="entity">The object to validate</param>
+        /// <param name="parentContext">The rule context of the object that <paramref name="entity"/> belongs to</param>
+        /// <param name="rules">The set of rules from the parent object to apply to <paramref name="entity"/></param>
+        /// <param name="traverseProperties">Whether or not to traverse this <paramref name="entity"/>'s properties</param>
+        /// <returns></returns>
         private IEnumerable<ValidationMessage> RecursiveValidate(object entity, RuleContext parentContext, IEnumerable<Rule> rules, bool traverseProperties = true)
         {
             var messages = Enumerable.Empty<ValidationMessage>();
@@ -53,7 +61,7 @@ namespace AutoRest.Core.Validation
                 return messages;
             }
 
-            // ensure that the rules can be re-enumerated without re-evaluating the enumeration.
+            // Ensure that the rules can be re-enumerated without re-evaluating the enumeration.
             var collectionRules = rules.ReEnumerable();
 
             var list = entity as IList;
@@ -70,6 +78,7 @@ namespace AutoRest.Core.Validation
 
             else if (traverseProperties && dictionary != null)
             {
+                // Dictionaries that don't provide any type info cannot be traversed, since it result in infinite iteration
                 var shouldTraverseEntries = dictionary.IsTraversableDictionary();
 
                 // Recursively validate each dictionary entry and add the entry 
@@ -86,8 +95,6 @@ namespace AutoRest.Core.Validation
                 // Validate each property of the object
                 var propertyMessages = entity.GetValidatableProperties()
                     .SelectMany(p => ValidateProperty(p, p.GetValue(entity), parentContext));
-
-                // Return the messages for both this value and its properties.
                 messages = messages.Concat(propertyMessages);
             }
 
@@ -96,6 +103,13 @@ namespace AutoRest.Core.Validation
             return messages.Concat(valueMessages);
         }
 
+        /// <summary>
+        /// Validates an object value 
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="collectionRules"></param>
+        /// <param name="parentContext"></param>
+        /// <returns></returns>
         private IEnumerable<ValidationMessage> ValidateObjectValue(object entity,
             IEnumerable<Rule> collectionRules, RuleContext parentContext)
         {
@@ -113,7 +127,9 @@ namespace AutoRest.Core.Validation
         {
             // Uses the property name resolver to get the name to use in the path of messages
             var propName = resolver(prop);
+            // Determine if anything about this property indicates that it shouldn't be traversed further 
             var shouldTraverseObject = prop.IsTraversableProperty();
+            // Create the context that's available to rules that validate this value
             var ruleContext = parentContext.CreateChild(value, propName);
 
             // Get any rules defined on this property and any defined as applying to the collection
@@ -121,12 +137,14 @@ namespace AutoRest.Core.Validation
             var collectionRules = prop.GetValidationCollectionRules();
 
             // Validate the value of this property against any rules for it
-            var propertyMessages = propertyRules.SelectMany(r => r.GetValidationMessages(value, ruleContext)).Select(e => e.AppendToPath(propName));
+            var propertyMessages = propertyRules.SelectMany(r => r.GetValidationMessages(value, ruleContext));
 
-            // Recursively validate the children of the property (passing any rules that apply to this collection)
-            var childrenMessages = RecursiveValidate(value, ruleContext, collectionRules, shouldTraverseObject).Select(e => e.AppendToPath(propName));
+            // Recursively validate the property (e.g. its properties or any list/dictionary entries),
+            // passing any rules that apply to this collection)
+            var childrenMessages = RecursiveValidate(value, ruleContext, collectionRules, shouldTraverseObject);
 
-            return propertyMessages.Concat(childrenMessages);
+            return propertyMessages.Concat(childrenMessages)
+                .Select(e => e.AppendToPath(propName));
         }
     }
 }

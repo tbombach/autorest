@@ -13,29 +13,20 @@ namespace AutoRest.Core.Validation
         private static readonly Type JsonExtensionDataType = typeof(JsonExtensionDataAttribute);
 
         /// <summary>
-        ///     Gets an enumerable of properties for <paramref name="entity" /> that can be validated
+        /// Gets an enumerable of properties for <paramref name="entity" /> that can be validated
         /// </summary>
         /// <param name="entity">The object to get properties for</param>
         /// <returns></returns>
         internal static IEnumerable<PropertyInfo> GetValidatableProperties(this object entity)
-        {
-            if (entity == null)
-            {
-                return Enumerable.Empty<PropertyInfo>();
-            }
-            return entity.GetType()
-                .GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance);
-        }
+            => entity.GetType().GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.Instance)
+                ?? Enumerable.Empty<PropertyInfo>();
 
         /// <summary>
-        /// [JsonExtension] properties and ones with type object can cause infinite recursion if recursively traversed
+        /// Properties of type object can cause infinite iteration if recursively traversed
         /// </summary>
         /// <param name="prop"></param>
         /// <returns></returns>
-        internal static bool IsTraversableProperty(this PropertyInfo prop)
-        {
-            return prop.PropertyType != typeof(object);
-        }
+        internal static bool IsTraversableProperty(this PropertyInfo prop) => prop.PropertyType != typeof(object);
 
         /// <summary>
         /// Determines if a dictionary's elements should be recursively traversed
@@ -78,14 +69,14 @@ namespace AutoRest.Core.Validation
             => type.GetCustomAttributes<RuleAttribute>(true).Select(each => each.Rule).ReEnumerable();
 
         /// <summary>
-        ///     The collection of default rules applies to all properties that do not define rules
-        ///     These can impose global conditions on any property that has not been otherwise validated.
+        /// The collection of default rules applies to all properties that do not define rules
+        /// These can impose global conditions on any property that has not been otherwise validated.
         /// </summary>
         /// <returns></returns>
         public static IEnumerable<Rule> DefaultRules = new[] { new MissingValidator() };
 
         /// <summary>
-        ///     The collection of rules that apply to all properties regardless of other rules.
+        /// The collection of rules that apply to all properties regardless of other rules.
         /// </summary>
         public static IEnumerable<Rule> UniversalRules = new[] { new NoControlCharacters() };
     }
