@@ -313,6 +313,92 @@ namespace Fixtures.Azure.AcceptanceTestsPaging
             }
 
             /// <summary>
+            /// A paging operation that doesn't return a full URL, just a fragment
+            /// </summary>
+            /// <param name='operations'>
+            /// The operations group for this extension method.
+            /// </param>
+            /// <param name='apiVersion'>
+            /// Sets the api version to use.
+            /// </param>
+            /// <param name='tenant'>
+            /// Sets the tenant to use.
+            /// </param>
+            public static IPage<Product> GetMultiplePagesFragmentNextLink(this IPagingOperations operations, string apiVersion, string tenant)
+            {
+                return Task.Factory.StartNew(s => ((IPagingOperations)s).GetMultiplePagesFragmentNextLinkAsync(apiVersion, tenant), operations, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
+            }
+
+            /// <summary>
+            /// A paging operation that doesn't return a full URL, just a fragment
+            /// </summary>
+            /// <param name='operations'>
+            /// The operations group for this extension method.
+            /// </param>
+            /// <param name='apiVersion'>
+            /// Sets the api version to use.
+            /// </param>
+            /// <param name='tenant'>
+            /// Sets the tenant to use.
+            /// </param>
+            /// <param name='cancellationToken'>
+            /// The cancellation token.
+            /// </param>
+            public static async Task<IPage<Product>> GetMultiplePagesFragmentNextLinkAsync(this IPagingOperations operations, string apiVersion, string tenant, CancellationToken cancellationToken = default(CancellationToken))
+            {
+                using (var _result = await operations.GetMultiplePagesFragmentNextLinkWithHttpMessagesAsync(apiVersion, tenant, null, cancellationToken).ConfigureAwait(false))
+                {
+                    return _result.Body;
+                }
+            }
+
+            /// <summary>
+            /// A paging operation that doesn't return a full URL, just a fragment
+            /// </summary>
+            /// <param name='operations'>
+            /// The operations group for this extension method.
+            /// </param>
+            /// <param name='apiVersion'>
+            /// Sets the api version to use.
+            /// </param>
+            /// <param name='tenant'>
+            /// Sets the tenant to use.
+            /// </param>
+            /// <param name='page'>
+            /// Sets the page to retrieve.
+            /// </param>
+            public static IPage<Product> GetMultiplePagesFragmentNextLinkNext(this IPagingOperations operations, string apiVersion, string tenant, string page)
+            {
+                return Task.Factory.StartNew(s => ((IPagingOperations)s).GetMultiplePagesFragmentNextLinkNextAsync(apiVersion, tenant, page), operations, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
+            }
+
+            /// <summary>
+            /// A paging operation that doesn't return a full URL, just a fragment
+            /// </summary>
+            /// <param name='operations'>
+            /// The operations group for this extension method.
+            /// </param>
+            /// <param name='apiVersion'>
+            /// Sets the api version to use.
+            /// </param>
+            /// <param name='tenant'>
+            /// Sets the tenant to use.
+            /// </param>
+            /// <param name='page'>
+            /// Sets the page to retrieve.
+            /// </param>
+            /// <param name='cancellationToken'>
+            /// The cancellation token.
+            /// </param>
+            public static async Task<IPage<Product>> GetMultiplePagesFragmentNextLinkNextAsync(this IPagingOperations operations, string apiVersion, string tenant, string page, CancellationToken cancellationToken = default(CancellationToken))
+            {
+                using (var _result = await operations.GetMultiplePagesFragmentNextLinkNextWithHttpMessagesAsync(apiVersion, tenant, page, null, cancellationToken).ConfigureAwait(false))
+                {
+                    return _result.Body;
+                }
+            }
+
+            /// <summary>
             /// A paging operation that finishes on the first call without a nextlink
             /// </summary>
             /// <param name='operations'>
@@ -651,6 +737,74 @@ namespace Fixtures.Azure.AcceptanceTestsPaging
             public static async Task<IPage<Product>> GetMultiplePagesFailureUriNextAsync(this IPagingOperations operations, string nextPageLink, CancellationToken cancellationToken = default(CancellationToken))
             {
                 using (var _result = await operations.GetMultiplePagesFailureUriNextWithHttpMessagesAsync(nextPageLink, null, cancellationToken).ConfigureAwait(false))
+                {
+                    return _result.Body;
+                }
+            }
+
+            /// <summary>
+            /// A paging operation that doesn't return a full URL, just a fragment
+            /// </summary>
+            /// <param name='operations'>
+            /// The operations group for this extension method.
+            /// </param>
+            /// <param name='nextPageLink'>
+            /// The NextLink from the previous successful call to List operation.
+            /// </param>
+            public static IPage<Product> GetMultiplePagesFragmentNextLinkNext(this IPagingOperations operations, string nextPageLink)
+            {
+                return Task.Factory.StartNew(s => ((IPagingOperations)s).GetMultiplePagesFragmentNextLinkNextAsync(nextPageLink), operations, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
+            }
+
+            /// <summary>
+            /// A paging operation that doesn't return a full URL, just a fragment
+            /// </summary>
+            /// <param name='operations'>
+            /// The operations group for this extension method.
+            /// </param>
+            /// <param name='nextPageLink'>
+            /// The NextLink from the previous successful call to List operation.
+            /// </param>
+            /// <param name='cancellationToken'>
+            /// The cancellation token.
+            /// </param>
+            public static async Task<IPage<Product>> GetMultiplePagesFragmentNextLinkNextAsync(this IPagingOperations operations, string nextPageLink, CancellationToken cancellationToken = default(CancellationToken))
+            {
+                using (var _result = await operations.GetMultiplePagesFragmentNextLinkNextWithHttpMessagesAsync(nextPageLink, null, cancellationToken).ConfigureAwait(false))
+                {
+                    return _result.Body;
+                }
+            }
+
+            /// <summary>
+            /// A paging operation that doesn't return a full URL, just a fragment
+            /// </summary>
+            /// <param name='operations'>
+            /// The operations group for this extension method.
+            /// </param>
+            /// <param name='nextPageLink'>
+            /// The NextLink from the previous successful call to List operation.
+            /// </param>
+            public static IPage<Product> GetMultiplePagesFragmentNextLinkNextNext(this IPagingOperations operations, string nextPageLink)
+            {
+                return Task.Factory.StartNew(s => ((IPagingOperations)s).GetMultiplePagesFragmentNextLinkNextNextAsync(nextPageLink), operations, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default).Unwrap().GetAwaiter().GetResult();
+            }
+
+            /// <summary>
+            /// A paging operation that doesn't return a full URL, just a fragment
+            /// </summary>
+            /// <param name='operations'>
+            /// The operations group for this extension method.
+            /// </param>
+            /// <param name='nextPageLink'>
+            /// The NextLink from the previous successful call to List operation.
+            /// </param>
+            /// <param name='cancellationToken'>
+            /// The cancellation token.
+            /// </param>
+            public static async Task<IPage<Product>> GetMultiplePagesFragmentNextLinkNextNextAsync(this IPagingOperations operations, string nextPageLink, CancellationToken cancellationToken = default(CancellationToken))
+            {
+                using (var _result = await operations.GetMultiplePagesFragmentNextLinkNextNextWithHttpMessagesAsync(nextPageLink, null, cancellationToken).ConfigureAwait(false))
                 {
                     return _result.Body;
                 }

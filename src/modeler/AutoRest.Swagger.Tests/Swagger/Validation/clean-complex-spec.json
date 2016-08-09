@@ -112,6 +112,15 @@
       }
     },
     "/foo": {
+      "parameters": [
+        {
+          "in": "query",
+          "name": "blah",
+          "type":  "string",
+            "description": "Blah query parameter"
+        }
+      ],
+
       "get": {
         "operationId": "Foo_Get",
         "description": "foo",

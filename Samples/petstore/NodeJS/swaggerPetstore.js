@@ -186,9 +186,9 @@ SwaggerPetstore.prototype.addPetUsingByteArray = function (options, callback) {
  * 
  * @param {string} [options.body.category.name]
  * 
- * @param {string} [options.body.name]
+ * @param {string} options.body.name
  * 
- * @param {array} [options.body.photoUrls]
+ * @param {array} options.body.photoUrls
  * 
  * @param {array} [options.body.tags]
  * 
@@ -309,9 +309,9 @@ SwaggerPetstore.prototype.addPet = function (options, callback) {
  * 
  * @param {string} [options.body.category.name]
  * 
- * @param {string} [options.body.name]
+ * @param {string} options.body.name
  * 
- * @param {array} [options.body.photoUrls]
+ * @param {array} options.body.photoUrls
  * 
  * @param {array} [options.body.tags]
  * 

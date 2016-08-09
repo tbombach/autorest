@@ -259,6 +259,54 @@ public interface Pagings {
     ServiceCall getMultiplePagesFailureUriAsync(final ListOperationCallback<Product> serviceCallback) throws IllegalArgumentException;
 
     /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param tenant Sets the tenant to use.
+     * @param apiVersion Sets the api version to use.
+     * @throws CloudException exception thrown from REST call
+     * @throws IOException exception thrown from serialization/deserialization
+     * @throws IllegalArgumentException exception thrown from invalid parameters
+     * @return the List&lt;Product&gt; object wrapped in {@link ServiceResponse} if successful.
+     */
+    ServiceResponse<PagedList<Product>> getMultiplePagesFragmentNextLink(final String tenant, final String apiVersion) throws CloudException, IOException, IllegalArgumentException;
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param tenant Sets the tenant to use.
+     * @param apiVersion Sets the api version to use.
+     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
+     * @throws IllegalArgumentException thrown if callback is null
+     * @return the {@link ServiceCall} object
+     */
+    ServiceCall getMultiplePagesFragmentNextLinkAsync(final String tenant, final String apiVersion, final ListOperationCallback<Product> serviceCallback) throws IllegalArgumentException;
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param tenant Sets the tenant to use.
+     * @param apiVersion Sets the api version to use.
+     * @param page Sets the page to retrieve.
+     * @throws CloudException exception thrown from REST call
+     * @throws IOException exception thrown from serialization/deserialization
+     * @throws IllegalArgumentException exception thrown from invalid parameters
+     * @return the List&lt;Product&gt; object wrapped in {@link ServiceResponse} if successful.
+     */
+    ServiceResponse<PagedList<Product>> getMultiplePagesFragmentNextLinkNext(final String tenant, final String apiVersion, final String page) throws CloudException, IOException, IllegalArgumentException;
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param tenant Sets the tenant to use.
+     * @param apiVersion Sets the api version to use.
+     * @param page Sets the page to retrieve.
+     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
+     * @throws IllegalArgumentException thrown if callback is null
+     * @return the {@link ServiceCall} object
+     */
+    ServiceCall getMultiplePagesFragmentNextLinkNextAsync(final String tenant, final String apiVersion, final String page, final ListOperationCallback<Product> serviceCallback) throws IllegalArgumentException;
+
+    /**
      * A paging operation that finishes on the first call without a nextlink.
      *
      * @param nextPageLink The NextLink from the previous successful call to List operation.
@@ -530,5 +578,49 @@ public interface Pagings {
      * @return the {@link ServiceCall} object
      */
     ServiceCall getMultiplePagesFailureUriNextAsync(final String nextPageLink, final ServiceCall serviceCall, final ListOperationCallback<Product> serviceCallback) throws IllegalArgumentException;
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param nextPageLink The NextLink from the previous successful call to List operation.
+     * @throws CloudException exception thrown from REST call
+     * @throws IOException exception thrown from serialization/deserialization
+     * @throws IllegalArgumentException exception thrown from invalid parameters
+     * @return the List&lt;Product&gt; object wrapped in {@link ServiceResponse} if successful.
+     */
+    ServiceResponse<PageImpl1<Product>> getMultiplePagesFragmentNextLinkNext(final String nextPageLink) throws CloudException, IOException, IllegalArgumentException;
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param nextPageLink The NextLink from the previous successful call to List operation.
+     * @param serviceCall the ServiceCall object tracking the Retrofit calls
+     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
+     * @throws IllegalArgumentException thrown if callback is null
+     * @return the {@link ServiceCall} object
+     */
+    ServiceCall getMultiplePagesFragmentNextLinkNextAsync(final String nextPageLink, final ServiceCall serviceCall, final ListOperationCallback<Product> serviceCallback) throws IllegalArgumentException;
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param nextPageLink The NextLink from the previous successful call to List operation.
+     * @throws CloudException exception thrown from REST call
+     * @throws IOException exception thrown from serialization/deserialization
+     * @throws IllegalArgumentException exception thrown from invalid parameters
+     * @return the List&lt;Product&gt; object wrapped in {@link ServiceResponse} if successful.
+     */
+    ServiceResponse<PageImpl1<Product>> getMultiplePagesFragmentNextLinkNextNext(final String nextPageLink) throws CloudException, IOException, IllegalArgumentException;
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param nextPageLink The NextLink from the previous successful call to List operation.
+     * @param serviceCall the ServiceCall object tracking the Retrofit calls
+     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
+     * @throws IllegalArgumentException thrown if callback is null
+     * @return the {@link ServiceCall} object
+     */
+    ServiceCall getMultiplePagesFragmentNextLinkNextNextAsync(final String nextPageLink, final ServiceCall serviceCall, final ListOperationCallback<Product> serviceCallback) throws IllegalArgumentException;
 
 }

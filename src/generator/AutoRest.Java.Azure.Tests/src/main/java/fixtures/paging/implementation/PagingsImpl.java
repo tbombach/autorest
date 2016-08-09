@@ -37,6 +37,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 import retrofit2.http.Url;
 import retrofit2.Response;
 
@@ -103,6 +104,14 @@ public final class PagingsImpl implements Pagings {
         Call<ResponseBody> getMultiplePagesFailureUri(@Header("accept-language") String acceptLanguage, @Header("User-Agent") String userAgent);
 
         @Headers("Content-Type: application/json; charset=utf-8")
+        @GET("paging/multiple/fragment/{tenant}")
+        Call<ResponseBody> getMultiplePagesFragmentNextLink(@Path("tenant") String tenant, @Query("api-version") String apiVersion, @Header("accept-language") String acceptLanguage, @Header("User-Agent") String userAgent);
+
+        @Headers("Content-Type: application/json; charset=utf-8")
+        @GET("paging/multiple/fragment/{tenant}/next")
+        Call<ResponseBody> getMultiplePagesFragmentNextLinkNext(@Path("tenant") String tenant, @Query("api-version") String apiVersion, @Query("page") String page, @Header("accept-language") String acceptLanguage, @Header("User-Agent") String userAgent);
+
+        @Headers("Content-Type: application/json; charset=utf-8")
         @GET
         Call<ResponseBody> getSinglePagesNext(@Url String nextPageLink, @Header("accept-language") String acceptLanguage, @Header("User-Agent") String userAgent);
 
@@ -137,6 +146,14 @@ public final class PagingsImpl implements Pagings {
         @Headers("Content-Type: application/json; charset=utf-8")
         @GET
         Call<ResponseBody> getMultiplePagesFailureUriNext(@Url String nextPageLink, @Header("accept-language") String acceptLanguage, @Header("User-Agent") String userAgent);
+
+        @Headers("Content-Type: application/json; charset=utf-8")
+        @GET
+        Call<ResponseBody> getMultiplePagesFragmentNextLinkNext(@Url String nextPageLink, @Header("accept-language") String acceptLanguage, @Header("User-Agent") String userAgent);
+
+        @Headers("Content-Type: application/json; charset=utf-8")
+        @GET
+        Call<ResponseBody> getMultiplePagesFragmentNextLinkNextNext(@Url String nextPageLink, @Header("accept-language") String acceptLanguage, @Header("User-Agent") String userAgent);
 
     }
 
@@ -935,6 +952,171 @@ public final class PagingsImpl implements Pagings {
     private ServiceResponse<PageImpl<Product>> getMultiplePagesFailureUriDelegate(Response<ResponseBody> response) throws CloudException, IOException {
         return new AzureServiceResponseBuilder<PageImpl<Product>, CloudException>(this.client.mapperAdapter())
                 .register(200, new TypeToken<PageImpl<Product>>() { }.getType())
+                .registerError(CloudException.class)
+                .build(response);
+    }
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param tenant Sets the tenant to use.
+     * @param apiVersion Sets the api version to use.
+     * @throws CloudException exception thrown from REST call
+     * @throws IOException exception thrown from serialization/deserialization
+     * @throws IllegalArgumentException exception thrown from invalid parameters
+     * @return the List&lt;Product&gt; object wrapped in {@link ServiceResponse} if successful.
+     */
+    public ServiceResponse<PagedList<Product>> getMultiplePagesFragmentNextLink(final String tenant, final String apiVersion) throws CloudException, IOException, IllegalArgumentException {
+        if (tenant == null) {
+            throw new IllegalArgumentException("Parameter tenant is required and cannot be null.");
+        }
+        if (apiVersion == null) {
+            throw new IllegalArgumentException("Parameter apiVersion is required and cannot be null.");
+        }
+        Call<ResponseBody> call = service.getMultiplePagesFragmentNextLink(tenant, apiVersion, this.client.acceptLanguage(), this.client.userAgent());
+        ServiceResponse<PageImpl1<Product>> response = getMultiplePagesFragmentNextLinkDelegate(call.execute());
+        PagedList<Product> result = new PagedList<Product>(response.getBody()) {
+            @Override
+            public Page<Product> nextPage(String nextPageLink) throws CloudException, IOException {
+                return getMultiplePagesFragmentNextLinkNext(tenant, apiVersion, page).getBody();
+            }
+        };
+        return new ServiceResponse<>(result, response.getResponse());
+    }
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param tenant Sets the tenant to use.
+     * @param apiVersion Sets the api version to use.
+     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
+     * @throws IllegalArgumentException thrown if callback is null
+     * @return the {@link Call} object
+     */
+    public ServiceCall getMultiplePagesFragmentNextLinkAsync(final String tenant, final String apiVersion, final ListOperationCallback<Product> serviceCallback) throws IllegalArgumentException {
+        if (serviceCallback == null) {
+            throw new IllegalArgumentException("ServiceCallback is required for async calls.");
+        }
+        if (tenant == null) {
+            serviceCallback.failure(new IllegalArgumentException("Parameter tenant is required and cannot be null."));
+            return null;
+        }
+        if (apiVersion == null) {
+            serviceCallback.failure(new IllegalArgumentException("Parameter apiVersion is required and cannot be null."));
+            return null;
+        }
+        Call<ResponseBody> call = service.getMultiplePagesFragmentNextLink(tenant, apiVersion, this.client.acceptLanguage(), this.client.userAgent());
+        final ServiceCall serviceCall = new ServiceCall(call);
+        call.enqueue(new ServiceResponseCallback<List<Product>>(serviceCallback) {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    ServiceResponse<PageImpl1<Product>> result = getMultiplePagesFragmentNextLinkDelegate(response);
+                    serviceCallback.load(result.getBody().getItems());
+                    if (result.getBody().getNextPageLink() != null
+                            && serviceCallback.progress(result.getBody().getItems()) == ListOperationCallback.PagingBahavior.CONTINUE) {
+                        getMultiplePagesFragmentNextLinkNextAsync(result.getBody().getNextPageLink(), tenant, apiVersion, page, serviceCall, serviceCallback);
+                    } else {
+                        serviceCallback.success(new ServiceResponse<>(serviceCallback.get(), result.getResponse()));
+                    }
+                } catch (CloudException | IOException exception) {
+                    serviceCallback.failure(exception);
+                }
+            }
+        });
+        return serviceCall;
+    }
+
+    private ServiceResponse<PageImpl1<Product>> getMultiplePagesFragmentNextLinkDelegate(Response<ResponseBody> response) throws CloudException, IOException, IllegalArgumentException {
+        return new AzureServiceResponseBuilder<PageImpl1<Product>, CloudException>(this.client.mapperAdapter())
+                .register(200, new TypeToken<PageImpl1<Product>>() { }.getType())
+                .registerError(CloudException.class)
+                .build(response);
+    }
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param tenant Sets the tenant to use.
+     * @param apiVersion Sets the api version to use.
+     * @param page Sets the page to retrieve.
+     * @throws CloudException exception thrown from REST call
+     * @throws IOException exception thrown from serialization/deserialization
+     * @throws IllegalArgumentException exception thrown from invalid parameters
+     * @return the List&lt;Product&gt; object wrapped in {@link ServiceResponse} if successful.
+     */
+    public ServiceResponse<PagedList<Product>> getMultiplePagesFragmentNextLinkNext(final String tenant, final String apiVersion, final String page) throws CloudException, IOException, IllegalArgumentException {
+        if (tenant == null) {
+            throw new IllegalArgumentException("Parameter tenant is required and cannot be null.");
+        }
+        if (apiVersion == null) {
+            throw new IllegalArgumentException("Parameter apiVersion is required and cannot be null.");
+        }
+        if (page == null) {
+            throw new IllegalArgumentException("Parameter page is required and cannot be null.");
+        }
+        Call<ResponseBody> call = service.getMultiplePagesFragmentNextLinkNext(tenant, apiVersion, page, this.client.acceptLanguage(), this.client.userAgent());
+        ServiceResponse<PageImpl1<Product>> response = getMultiplePagesFragmentNextLinkNextDelegate(call.execute());
+        PagedList<Product> result = new PagedList<Product>(response.getBody()) {
+            @Override
+            public Page<Product> nextPage(String nextPageLink) throws CloudException, IOException {
+                return getMultiplePagesFragmentNextLinkNextNext(nextPageLink).getBody();
+            }
+        };
+        return new ServiceResponse<>(result, response.getResponse());
+    }
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param tenant Sets the tenant to use.
+     * @param apiVersion Sets the api version to use.
+     * @param page Sets the page to retrieve.
+     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
+     * @throws IllegalArgumentException thrown if callback is null
+     * @return the {@link Call} object
+     */
+    public ServiceCall getMultiplePagesFragmentNextLinkNextAsync(final String tenant, final String apiVersion, final String page, final ListOperationCallback<Product> serviceCallback) throws IllegalArgumentException {
+        if (serviceCallback == null) {
+            throw new IllegalArgumentException("ServiceCallback is required for async calls.");
+        }
+        if (tenant == null) {
+            serviceCallback.failure(new IllegalArgumentException("Parameter tenant is required and cannot be null."));
+            return null;
+        }
+        if (apiVersion == null) {
+            serviceCallback.failure(new IllegalArgumentException("Parameter apiVersion is required and cannot be null."));
+            return null;
+        }
+        if (page == null) {
+            serviceCallback.failure(new IllegalArgumentException("Parameter page is required and cannot be null."));
+            return null;
+        }
+        Call<ResponseBody> call = service.getMultiplePagesFragmentNextLinkNext(tenant, apiVersion, page, this.client.acceptLanguage(), this.client.userAgent());
+        final ServiceCall serviceCall = new ServiceCall(call);
+        call.enqueue(new ServiceResponseCallback<List<Product>>(serviceCallback) {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    ServiceResponse<PageImpl1<Product>> result = getMultiplePagesFragmentNextLinkNextDelegate(response);
+                    serviceCallback.load(result.getBody().getItems());
+                    if (result.getBody().getNextPageLink() != null
+                            && serviceCallback.progress(result.getBody().getItems()) == ListOperationCallback.PagingBahavior.CONTINUE) {
+                        getMultiplePagesFragmentNextLinkNextNextAsync(result.getBody().getNextPageLink(), serviceCall, serviceCallback);
+                    } else {
+                        serviceCallback.success(new ServiceResponse<>(serviceCallback.get(), result.getResponse()));
+                    }
+                } catch (CloudException | IOException exception) {
+                    serviceCallback.failure(exception);
+                }
+            }
+        });
+        return serviceCall;
+    }
+
+    private ServiceResponse<PageImpl1<Product>> getMultiplePagesFragmentNextLinkNextDelegate(Response<ResponseBody> response) throws CloudException, IOException, IllegalArgumentException {
+        return new AzureServiceResponseBuilder<PageImpl1<Product>, CloudException>(this.client.mapperAdapter())
+                .register(200, new TypeToken<PageImpl1<Product>>() { }.getType())
                 .registerError(CloudException.class)
                 .build(response);
     }
@@ -1748,6 +1930,132 @@ public final class PagingsImpl implements Pagings {
     private ServiceResponse<PageImpl<Product>> getMultiplePagesFailureUriNextDelegate(Response<ResponseBody> response) throws CloudException, IOException, IllegalArgumentException {
         return new AzureServiceResponseBuilder<PageImpl<Product>, CloudException>(this.client.mapperAdapter())
                 .register(200, new TypeToken<PageImpl<Product>>() { }.getType())
+                .registerError(CloudException.class)
+                .build(response);
+    }
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param nextPageLink The NextLink from the previous successful call to List operation.
+     * @throws CloudException exception thrown from REST call
+     * @throws IOException exception thrown from serialization/deserialization
+     * @throws IllegalArgumentException exception thrown from invalid parameters
+     * @return the List&lt;Product&gt; object wrapped in {@link ServiceResponse} if successful.
+     */
+    public ServiceResponse<PageImpl1<Product>> getMultiplePagesFragmentNextLinkNext(final String nextPageLink) throws CloudException, IOException, IllegalArgumentException {
+        if (nextPageLink == null) {
+            throw new IllegalArgumentException("Parameter nextPageLink is required and cannot be null.");
+        }
+        Call<ResponseBody> call = service.getMultiplePagesFragmentNextLinkNext(nextPageLink, this.client.acceptLanguage(), this.client.userAgent());
+        return getMultiplePagesFragmentNextLinkNextDelegate(call.execute());
+    }
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param nextPageLink The NextLink from the previous successful call to List operation.
+     * @param serviceCall the ServiceCall object tracking the Retrofit calls
+     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
+     * @throws IllegalArgumentException thrown if callback is null
+     * @return the {@link Call} object
+     */
+    public ServiceCall getMultiplePagesFragmentNextLinkNextAsync(final String nextPageLink, final ServiceCall serviceCall, final ListOperationCallback<Product> serviceCallback) throws IllegalArgumentException {
+        if (serviceCallback == null) {
+            throw new IllegalArgumentException("ServiceCallback is required for async calls.");
+        }
+        if (nextPageLink == null) {
+            serviceCallback.failure(new IllegalArgumentException("Parameter nextPageLink is required and cannot be null."));
+            return null;
+        }
+        Call<ResponseBody> call = service.getMultiplePagesFragmentNextLinkNext(nextPageLink, this.client.acceptLanguage(), this.client.userAgent());
+        serviceCall.newCall(call);
+        call.enqueue(new ServiceResponseCallback<List<Product>>(serviceCallback) {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    ServiceResponse<PageImpl1<Product>> result = getMultiplePagesFragmentNextLinkNextDelegate(response);
+                    serviceCallback.load(result.getBody().getItems());
+                    if (result.getBody().getNextPageLink() != null
+                            && serviceCallback.progress(result.getBody().getItems()) == ListOperationCallback.PagingBahavior.CONTINUE) {
+                        getMultiplePagesFragmentNextLinkNextAsync(result.getBody().getNextPageLink(), serviceCall, serviceCallback);
+                    } else {
+                        serviceCallback.success(new ServiceResponse<>(serviceCallback.get(), result.getResponse()));
+                    }
+                } catch (CloudException | IOException exception) {
+                    serviceCallback.failure(exception);
+                }
+            }
+        });
+        return serviceCall;
+    }
+
+    private ServiceResponse<PageImpl1<Product>> getMultiplePagesFragmentNextLinkNextDelegate(Response<ResponseBody> response) throws CloudException, IOException, IllegalArgumentException {
+        return new AzureServiceResponseBuilder<PageImpl1<Product>, CloudException>(this.client.mapperAdapter())
+                .register(200, new TypeToken<PageImpl1<Product>>() { }.getType())
+                .registerError(CloudException.class)
+                .build(response);
+    }
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param nextPageLink The NextLink from the previous successful call to List operation.
+     * @throws CloudException exception thrown from REST call
+     * @throws IOException exception thrown from serialization/deserialization
+     * @throws IllegalArgumentException exception thrown from invalid parameters
+     * @return the List&lt;Product&gt; object wrapped in {@link ServiceResponse} if successful.
+     */
+    public ServiceResponse<PageImpl1<Product>> getMultiplePagesFragmentNextLinkNextNext(final String nextPageLink) throws CloudException, IOException, IllegalArgumentException {
+        if (nextPageLink == null) {
+            throw new IllegalArgumentException("Parameter nextPageLink is required and cannot be null.");
+        }
+        Call<ResponseBody> call = service.getMultiplePagesFragmentNextLinkNextNext(nextPageLink, this.client.acceptLanguage(), this.client.userAgent());
+        return getMultiplePagesFragmentNextLinkNextNextDelegate(call.execute());
+    }
+
+    /**
+     * A paging operation that doesn't return a full URL, just a fragment.
+     *
+     * @param nextPageLink The NextLink from the previous successful call to List operation.
+     * @param serviceCall the ServiceCall object tracking the Retrofit calls
+     * @param serviceCallback the async ServiceCallback to handle successful and failed responses.
+     * @throws IllegalArgumentException thrown if callback is null
+     * @return the {@link Call} object
+     */
+    public ServiceCall getMultiplePagesFragmentNextLinkNextNextAsync(final String nextPageLink, final ServiceCall serviceCall, final ListOperationCallback<Product> serviceCallback) throws IllegalArgumentException {
+        if (serviceCallback == null) {
+            throw new IllegalArgumentException("ServiceCallback is required for async calls.");
+        }
+        if (nextPageLink == null) {
+            serviceCallback.failure(new IllegalArgumentException("Parameter nextPageLink is required and cannot be null."));
+            return null;
+        }
+        Call<ResponseBody> call = service.getMultiplePagesFragmentNextLinkNextNext(nextPageLink, this.client.acceptLanguage(), this.client.userAgent());
+        serviceCall.newCall(call);
+        call.enqueue(new ServiceResponseCallback<List<Product>>(serviceCallback) {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                try {
+                    ServiceResponse<PageImpl1<Product>> result = getMultiplePagesFragmentNextLinkNextNextDelegate(response);
+                    serviceCallback.load(result.getBody().getItems());
+                    if (result.getBody().getNextPageLink() != null
+                            && serviceCallback.progress(result.getBody().getItems()) == ListOperationCallback.PagingBahavior.CONTINUE) {
+                        getMultiplePagesFragmentNextLinkNextNextAsync(result.getBody().getNextPageLink(), serviceCall, serviceCallback);
+                    } else {
+                        serviceCallback.success(new ServiceResponse<>(serviceCallback.get(), result.getResponse()));
+                    }
+                } catch (CloudException | IOException exception) {
+                    serviceCallback.failure(exception);
+                }
+            }
+        });
+        return serviceCall;
+    }
+
+    private ServiceResponse<PageImpl1<Product>> getMultiplePagesFragmentNextLinkNextNextDelegate(Response<ResponseBody> response) throws CloudException, IOException, IllegalArgumentException {
+        return new AzureServiceResponseBuilder<PageImpl1<Product>, CloudException>(this.client.mapperAdapter())
+                .register(200, new TypeToken<PageImpl1<Product>>() { }.getType())
                 .registerError(CloudException.class)
                 .build(response);
     }

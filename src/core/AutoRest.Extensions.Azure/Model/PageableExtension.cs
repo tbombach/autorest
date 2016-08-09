@@ -8,5 +8,6 @@ namespace AutoRest.Extensions.Azure.Model
         public string NextLinkName { get; set; }
         public string ItemName { get; set; }
         public string OperationName { get; set; }
+        public bool CompleteUrl { get; set; }
     }
 }

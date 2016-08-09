@@ -44,7 +44,7 @@
             "name": "client-request-id",
             "in": "header",
             "required": false,
-            "type": "string",
+            "type": "string"
           },
           {
             "name": "maxresults",
@@ -93,7 +93,7 @@
             "name": "client-request-id",
             "in": "header",
             "required": false,
-            "type": "string",
+            "type": "string"
           },
           {
             "name": "maxresults",
@@ -142,7 +142,7 @@
             "name": "client-request-id",
             "in": "header",
             "required": false,
-            "type": "string",
+            "type": "string"
           },
           {
             "name": "maxresults",
@@ -274,6 +274,83 @@
             "description": "Initial response with ProvisioningState='Canceled'",
             "schema": {
               "$ref": "#/definitions/ProductResult"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/paging/multiple/fragment/{tenant}": {
+      "get": {
+        "x-ms-pageable": { "nextLinkName": "odata.nextLink", "itemName": "values" },
+        "operationId": "Paging_getMultiplePagesFragmentNextLink",
+        "description": "A paging operation that doesn't return a full URL, just a fragment",
+        "parameters": [
+          {
+            "name": "api-version",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Sets the api version to use."
+          },
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Sets the tenant to use."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paging response with a fragment nextLink",
+            "schema": {
+              "$ref": "#/definitions/OdataProductResult"
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    }
+  },
+  "x-ms-paths": {
+    "/paging/multiple/fragment/{tenant}/next": {
+      "get": {
+        "x-ms-pageable": { "nextLinkName": "odata.nextLink", "itemName": "values" },
+        "operationId": "Paging_getMultiplePagesFragmentNextLinkNext",
+        "description": "A paging operation that doesn't return a full URL, just a fragment",
+        "parameters": [
+          {
+            "name": "api-version",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Sets the api version to use."
+          },
+          {
+            "name": "tenant",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Sets the tenant to use."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "Sets the page to retrieve."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paging response with a fragment nextLink",
+            "schema": {
+              "$ref": "#/definitions/OdataProductResult"
             }
           },
           "default": {

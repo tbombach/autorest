@@ -120,6 +120,28 @@ var paging = function(coverage) {
     }
   });
 
+  router.get('/multiple/fragment/:tenant', function(req, res, next) {
+    if(req.query.api_version != "1.6" || req.tenant != "test_user") {
+      res.status(400).end("Required path and query parameters are not present");
+    }
+    else {
+      res.status(200).end('{ "values": [ {"properties":{"id" : ' + req.params.pagenumber + ', "name": "product"}} ], "odata.nextLink": "next?page="' + ++req.query.page + '"}');
+    }
+  });
+
+  router.get('/multiple/fragment/:tenant/next', function(req, res, next) {
+    if(req.query.api_version != "1.6" || req.tenant != "test_user") {
+      res.status(400).end("Required path and query parameters are not present");
+    }
+    else if(req.query.page < 10) {
+      res.status(200).end('{ "values": [ {"properties":{"id" : ' + req.params.pagenumber + ', "name": "product"}} ], "odata.nextLink": "next?page="' + ++req.query.page + '"}');
+    }
+    else {
+      coverage["PagingFragment"]++;
+      res.status(200).end('{"values": [ {"properties":{"id" : ' + req.params.pagenumber + ', "name": "product"}} ]}');
+    }
+  });
+
   /*** NEGATIVE TESTS HERE ***/
   router.get('/single/failure', function(req, res, next) {
     coverage["PagingSingleFailure"]++;
