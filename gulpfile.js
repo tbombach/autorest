@@ -523,6 +523,7 @@ gulp.task('regenerate:expected:go', function(cb){
     'codeGenerator': 'Go',
     'flatteningThreshold': '1'
   }, cb);
+  process.env.GOPATH = __dirname + '/src/generator/AutoRest.Go.Tests';
 })
 
 gulp.task('regenerate:expected:samples', ['regenerate:expected:samples:azure'], function(){
