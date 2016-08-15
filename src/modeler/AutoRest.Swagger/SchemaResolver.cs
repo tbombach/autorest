@@ -16,7 +16,6 @@ namespace AutoRest.Swagger
     public class SchemaResolver : ICloneable
     {
         private const int MaximumReferenceDepth = 40;
-        private readonly SwaggerModeler _modeler;
         private readonly ServiceDefinition _serviceDefinition;
 
         /// <summary>
@@ -30,8 +29,16 @@ namespace AutoRest.Swagger
                 throw new ArgumentNullException("modeler");
             }
 
-            _modeler = modeler;
             _serviceDefinition = modeler.ServiceDefinition;
+        }
+
+        /// <summary>
+        /// Create a new schema resolver in the context of the given swagger spec
+        /// </summary>
+        /// <param name="modeler">The swagger spec modeler</param>
+        public SchemaResolver(ServiceDefinition definition)
+        {
+            _serviceDefinition = definition;
         }
 
         /// <summary>
@@ -41,7 +48,7 @@ namespace AutoRest.Swagger
         /// <returns>A schema resolver at the same depth as the current resolver.</returns>
         public object Clone()
         {
-            var resolver = new SchemaResolver(_modeler);
+            var resolver = new SchemaResolver(_serviceDefinition);
             return resolver;
         }
 

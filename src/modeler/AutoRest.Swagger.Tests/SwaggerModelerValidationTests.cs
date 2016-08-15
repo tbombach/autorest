@@ -148,5 +148,12 @@ namespace AutoRest.Swagger.Tests
             var messages = ValidateSwagger(Path.Combine("Swagger", "Validation", "parameter-missing-description.json"));
             messages.AssertOnlyValidationMessage(typeof(ParameterDescriptionRequired));
         }
+
+        [Fact]
+        public void PageableResultModelingValidation()
+        {
+            var messages = ValidateSwagger(Path.Combine("Swagger", "Validation", "pageable-not-modeled.json"));
+            messages.AssertOnlyValidationMessage(typeof(NextLinkPropertyMustExist));
+        }
     }
 }
