@@ -2,6 +2,7 @@
 namespace Petstore
 {
     using System.Linq;
+    using Microsoft.Rest;
     using Microsoft.Rest.Azure;
     using Models;
 
@@ -35,29 +36,29 @@ namespace Petstore
         /// subscription. The subscription ID forms part of the URI for every service
         /// call.
         /// </summary>
-        public System.String SubscriptionId { get; set; }
+        public string SubscriptionId { get; set; }
 
         /// <summary>
         /// Client Api Version.
         /// </summary>
-        public System.String ApiVersion { get; private set; }
+        public string ApiVersion { get; private set; }
 
         /// <summary>
         /// Gets or sets the preferred language for the response.
         /// </summary>
-        public System.String AcceptLanguage { get; set; }
+        public string AcceptLanguage { get; set; }
 
         /// <summary>
         /// Gets or sets the retry timeout in seconds for Long Running Operations.
         /// Default value is 30.
         /// </summary>
-        public System.Int32? LongRunningOperationRetryTimeout { get; set; }
+        public int? LongRunningOperationRetryTimeout { get; set; }
 
         /// <summary>
         /// When set to true a unique x-ms-client-request-id value is generated and
         /// included in each request. Default is true.
         /// </summary>
-        public System.Boolean? GenerateClientRequestId { get; set; }
+        public bool? GenerateClientRequestId { get; set; }
 
         /// <summary>
         /// Gets the IStorageAccountsOperations.
@@ -127,7 +128,7 @@ namespace Petstore
         /// <param name='handlers'>
         /// Optional. The delegating handlers to add to the http client pipeline.
         /// </param>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// Thrown when a required parameter is null
         /// </exception>
         protected StorageManagementClient(System.Uri baseUri, System.Net.Http.HttpClientHandler rootHandler, params System.Net.Http.DelegatingHandler[] handlers) : this(rootHandler, handlers)
@@ -240,7 +241,7 @@ namespace Petstore
         /// <param name='handlers'>
         /// Optional. The delegating handlers to add to the http client pipeline.
         /// </param>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// Thrown when a required parameter is null
         /// </exception>
         public StorageManagementClient(System.Uri baseUri, Microsoft.Rest.ServiceClientCredentials credentials, System.Net.Http.HttpClientHandler rootHandler, params System.Net.Http.DelegatingHandler[] handlers) : this(rootHandler, handlers)
