@@ -38,6 +38,7 @@ var paging = function(coverage) {
   coverage['PagingSingleFailure'] = 0;
   coverage['PagingMultipleFailure'] = 0;
   coverage['PagingMultipleFailureUri'] = 0;
+  coverage['PagingFragment'] = 0;
 
   router.get('/single', function(req, res, next) {
     coverage["PagingSingle"]++;
@@ -121,24 +122,24 @@ var paging = function(coverage) {
   });
 
   router.get('/multiple/fragment/:tenant', function(req, res, next) {
-    if(req.query.api_version != "1.6" || req.tenant != "test_user") {
+    if(req.query.api_version != "1.6" || req.params.tenant != "test_user") {
       res.status(400).end("Required path and query parameters are not present");
     }
     else {
-      res.status(200).end('{ "values": [ {"properties":{"id" : ' + req.params.pagenumber + ', "name": "product"}} ], "odata.nextLink": "next?page="' + ++req.query.page + '"}');
+      res.status(200).end('{ "values": [ {"properties":{"id" : 1, "name": "product"}} ], "odata.nextLink": "next?page=2"}');
     }
   });
 
   router.get('/multiple/fragment/:tenant/next', function(req, res, next) {
-    if(req.query.api_version != "1.6" || req.tenant != "test_user") {
+    if(req.query.api_version != "1.6" || req.params.tenant != "test_user") {
       res.status(400).end("Required path and query parameters are not present");
     }
     else if(req.query.page < 10) {
-      res.status(200).end('{ "values": [ {"properties":{"id" : ' + req.params.pagenumber + ', "name": "product"}} ], "odata.nextLink": "next?page="' + ++req.query.page + '"}');
+      res.status(200).end('{ "values": [ {"properties":{"id" : ' + req.query.page + ', "name": "product"}} ], "odata.nextLink": "next?page=' + ++req.query.page + '"}');
     }
     else {
       coverage["PagingFragment"]++;
-      res.status(200).end('{"values": [ {"properties":{"id" : ' + req.params.pagenumber + ', "name": "product"}} ]}');
+      res.status(200).end('{"values": [ {"properties":{"id" : ' + req.query.page + ', "name": "product"}} ]}');
     }
   });
 
