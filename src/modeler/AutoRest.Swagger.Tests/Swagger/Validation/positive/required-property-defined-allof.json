@@ -1,21 +1,15 @@
 ﻿{
   "swagger": "2.0",
   "info": {
-    "title": "Definition missing description",
-    "description": "Some documentation.",
-    "version": "2014-04-01-preview"
+    "title": "RequiredPropertyDefinedAllOf",
+    "description": "A spec file with required properties that are defined in ancestors",
+    "version": "2016-08-32"
   },
-  "host": "management.azure.com",
+  "host": "contoso.com",
   "schemes": [
     "https"
   ],
   "basePath": "/",
-  "produces": [
-    "application/json"
-  ],
-  "consumes": [
-    "application/json"
-  ],
   "paths": {
     "/foo": {
       "post": {
@@ -35,7 +29,7 @@
   },
   "definitions": {
     "BaseError": {
-      "description": "foo",
+      "description": "Base error",
       "properties": {
         "foo": {
           "type": "string",
@@ -43,19 +37,35 @@
         }
       }
     },
-    "Error": {
+    "ParentError": {
       "allOf": [
         {
           "$ref": "#/definitions/BaseError"
         }
       ],
+      "description": "Parent error",
+      "properties": {
+        "bar": {
+          "type": "string",
+          "description": "bar property"
+        }
+      }
+    },
+    "Error": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/ParentError"
+        }
+      ],
       "description": "Default error",
       "required": [
-        "foo"
+        "foo",
+        "bar",
+        "baz"
       ],
       "properties": { 
-        "bar": {
-          "description": "bar property",
+        "baz": {
+          "description": "baz property",
           "type": "string"
         }
       }

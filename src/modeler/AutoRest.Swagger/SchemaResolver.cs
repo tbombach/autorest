@@ -97,7 +97,7 @@ namespace AutoRest.Swagger
                     if (schema.Extends != null)
                     {
                         throw new ArgumentException(
-                            string.Format(CultureInfo.InvariantCulture, 
+                            string.Format(CultureInfo.InvariantCulture,
                             Properties.Resources.InvalidTypeExtendsWithAllOf, schema.Title));
                     }
 
@@ -113,12 +113,12 @@ namespace AutoRest.Swagger
 
                 var schemaList =
                     new List<Schema>().Concat(schema.AllOf)
-                        .Concat(new List<Schema> {propertiesOnlySchema});
+                        .Concat(new List<Schema> { propertiesOnlySchema });
                 schema.Properties = new Dictionary<string, Schema>();
                 foreach (var componentSchema in schemaList)
                 {
                     // keep the same resolver state for each of the children
-                    var unwrappedComponent = ((SchemaResolver) Clone()).Unwrap(
+                    var unwrappedComponent = ((SchemaResolver)Clone()).Unwrap(
                         componentSchema);
                     if (unwrappedComponent != null && unwrappedComponent.Properties != null)
                     {
@@ -131,7 +131,7 @@ namespace AutoRest.Swagger
                                     schema.Properties[propertyName], unwrappedProperty))
                                 {
                                     throw new InvalidOperationException(
-                                        string.Format(CultureInfo.InvariantCulture, 
+                                        string.Format(CultureInfo.InvariantCulture,
                                         Properties.Resources.IncompatibleTypesInSchemaComposition,
                                             propertyName,
                                             unwrappedComponent.Properties[propertyName].Type,
@@ -141,14 +141,14 @@ namespace AutoRest.Swagger
                             }
                             else
                             {
-                                var parentProperty = ((SchemaResolver) Clone())
+                                var parentProperty = ((SchemaResolver)Clone())
                                     .FindParentProperty(parentSchema, propertyName);
                                 if (parentProperty != null)
                                 {
                                     if (!SchemaTypesAreEquivalent(parentProperty, unwrappedProperty))
                                     {
                                         throw new InvalidOperationException(
-                                            string.Format(CultureInfo.InvariantCulture, 
+                                            string.Format(CultureInfo.InvariantCulture,
                                                 Properties.Resources.IncompatibleTypesInBaseSchema, propertyName,
                                                 parentProperty.Type,
                                                 unwrappedProperty.Type, schema.Title));
@@ -276,22 +276,37 @@ namespace AutoRest.Swagger
         /// <param name="parentReference">A reference to an ancestor schema</param>
         /// <param name="propertyName">The property to search for</param>
         /// <returns></returns>
-        private Schema FindParentProperty(string parentReference, string propertyName)
+        public Schema FindParentProperty(string parentReference, string propertyName)
         {
             Schema returnedSchema = null;
             if (parentReference != null)
             {
                 Schema parentSchema = Dereference(parentReference);
-                ExpandAllOf(parentSchema);
-                if (parentSchema.Properties != null &&
-                    parentSchema.Properties.ContainsKey(propertyName))
-                {
-                    returnedSchema = parentSchema.Properties[propertyName];
-                }
-                else
-                {
-                    returnedSchema = FindParentProperty(parentSchema.Extends, propertyName);
-                }
+                returnedSchema = FindProperty(parentSchema, propertyName);
+            }
+
+            return returnedSchema;
+        }
+
+        /// <summary>
+        /// Determine whether a given property is defined in the schema or its ancestors. 
+        /// Return the property schema if it is defined, or null if not.
+        /// </summary>
+        /// <param name="schema">A schema</param>
+        /// <param name="propertyName">The property to search for</param>
+        /// <returns></returns>
+        public Schema FindProperty(Schema schema, string propertyName)
+        {
+            Schema returnedSchema = null;
+            ExpandAllOf(schema);
+            if (schema.Properties != null &&
+                schema.Properties.ContainsKey(propertyName))
+            {
+                returnedSchema = schema.Properties[propertyName];
+            }
+            else
+            {
+                returnedSchema = FindParentProperty(schema.Extends, propertyName);
             }
 
             return returnedSchema;
@@ -311,7 +326,7 @@ namespace AutoRest.Swagger
         private Schema DereferenceInner(string referencePath, List<string> visitedReferences)
         {
             // Check if external reference
-            string[] splitReference = referencePath.Split(new[] {'#'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] splitReference = referencePath.Split(new[] { '#' }, StringSplitOptions.RemoveEmptyEntries);
             if (splitReference.Length == 2)
             {
                 referencePath = "#" + splitReference[1];
@@ -319,7 +334,7 @@ namespace AutoRest.Swagger
 
             if (visitedReferences.Contains(referencePath.ToUpperInvariant()))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, 
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture,
                     Properties.Resources.CircularReference, referencePath));
             }
 
@@ -331,7 +346,7 @@ namespace AutoRest.Swagger
             var definitions = _serviceDefinition.Definitions;
             if (definitions == null || !definitions.ContainsKey(referencePath.StripDefinitionPath()))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, 
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture,
                     Properties.Resources.ReferenceDoesNotExist,
                     referencePath.StripDefinitionPath()));
             }
