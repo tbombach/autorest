@@ -40,7 +40,7 @@
   "definitions": {
     "Pageable": {
       "type": "object",
-      "description": "",
+      "description": "Pageable object",
       "properties": {
         "value": {
           "type": "array",
