@@ -284,12 +284,12 @@
     },
     "/paging/multiple/fragment/{tenant}": {
       "get": {
-        "x-ms-pageable": { "nextLinkName": "odata.nextLink", "itemName": "values" },
+        "x-ms-pageable": { "nextLinkName": "odata.nextLink", "itemName": "values", "operationName": "Paging_nextFragment" },
         "operationId": "Paging_getMultiplePagesFragmentNextLink",
         "description": "A paging operation that doesn't return a full URL, just a fragment",
         "parameters": [
           {
-            "name": "api-version",
+            "name": "api_version",
             "in": "query",
             "required": true,
             "type": "string",
@@ -318,14 +318,14 @@
     }
   },
   "x-ms-paths": {
-    "/paging/multiple/fragment/{tenant}/next": {
+    "/paging/multiple/fragment/{tenant}/{nextLink}": {
       "get": {
-        "x-ms-pageable": { "nextLinkName": "odata.nextLink", "itemName": "values" },
-        "operationId": "Paging_getMultiplePagesFragmentNextLinkNext",
+        "x-ms-pageable": { "nextLinkName": "odata.nextLink", "itemName": "values", "operationName": "Paging_nextFragment" },
+        "operationId": "Paging_nextFragment",
         "description": "A paging operation that doesn't return a full URL, just a fragment",
         "parameters": [
           {
-            "name": "api-version",
+            "name": "api_version",
             "in": "query",
             "required": true,
             "type": "string",
@@ -339,11 +339,12 @@
             "description": "Sets the tenant to use."
           },
           {
-            "name": "page",
-            "in": "query",
+            "name": "nextLink",
+            "in": "path",
             "required": true,
             "type": "string",
-            "description": "Sets the page to retrieve."
+            "description": "Next link for list operation.",
+            "x-ms-skip-url-encoding": true
           }
         ],
         "responses": {
