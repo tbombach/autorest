@@ -142,7 +142,7 @@ namespace AutoRest.Swagger
                             else
                             {
                                 var parentProperty = ((SchemaResolver)Clone())
-                                    .FindParentProperty(parentSchema, propertyName);
+                                    .FindProperty(parentSchema, propertyName);
                                 if (parentProperty != null)
                                 {
                                     if (!SchemaTypesAreEquivalent(parentProperty, unwrappedProperty))
@@ -270,18 +270,18 @@ namespace AutoRest.Swagger
         }
 
         /// <summary>
-        /// Determine whether a given property is defined in the given parent schema or its ancestors. 
+        /// Determine whether a given property is defined in the referenced schema or its ancestors. 
         /// Return the property schema if it is defined, or null if not.
         /// </summary>
-        /// <param name="parentReference">A reference to an ancestor schema</param>
+        /// <param name="reference">A reference to a schema</param>
         /// <param name="propertyName">The property to search for</param>
         /// <returns></returns>
-        public Schema FindParentProperty(string parentReference, string propertyName)
+        public Schema FindProperty(string reference, string propertyName)
         {
             Schema returnedSchema = null;
-            if (parentReference != null)
+            if (reference != null)
             {
-                Schema parentSchema = Dereference(parentReference);
+                Schema parentSchema = Dereference(reference);
                 returnedSchema = FindProperty(parentSchema, propertyName);
             }
 
@@ -306,7 +306,7 @@ namespace AutoRest.Swagger
             }
             else
             {
-                returnedSchema = FindParentProperty(schema.Extends, propertyName);
+                returnedSchema = FindProperty(schema.Extends, propertyName);
             }
 
             return returnedSchema;
