@@ -22,6 +22,7 @@ namespace AutoRest.Swagger.Model
         /// </summary>
         [JsonExtensionData]
         [CollectionRule(typeof(NonEmptyClientName))]
+        [CollectionRule(typeof(NextLinkPropertyMustExist))]
         public Dictionary<string, object> Extensions { get; set; }
     }
 }
