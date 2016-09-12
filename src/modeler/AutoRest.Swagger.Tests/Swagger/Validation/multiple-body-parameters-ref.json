@@ -1,0 +1,59 @@
+﻿{
+  "swagger": "2.0",
+  "info": {
+    "title": "MultipleBodyParametersRef",
+    "description": "A client with an operation that contains multiple body parameters",
+    "version": "2014-04-01-preview"
+  },
+  "host": "management.azure.com",
+  "schemes": [
+    "https"
+  ],
+  "basePath": "/",
+  "produces": [
+    "application/json"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "paths": {
+    "/foo": {
+      "post": {
+        "operationId": "PostFoo",
+        "summary": "Foo path",
+        "description": "Foo operation",
+        "parameters": [
+          {
+            "bar": {
+              "$ref": "#/parameters/bar"
+            },
+            "baz": {
+              "$ref": "#/parameters/baz"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    }
+  },
+  "parameters": {
+    "bar": {
+      "in": "body",
+      "description": "bar property",
+      "schema": {
+        "type": "string"
+      }
+    },
+    "baz": {
+      "in": "body",
+      "description": "baz property",
+      "schema": {
+        "type": "string"
+      }
+    }
+  }
+}
