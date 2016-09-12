@@ -19,7 +19,7 @@ namespace AutoRest.Swagger.Validation
         /// <param name="entity"></param>
         /// <returns></returns>
         public override bool IsValid(Schema schema, RuleContext context)
-            => context.Key != "properties" || IsClientFlattenUsed(schema.Extensions);
+            => context.Key != "properties" || IsClientFlattenUsed(schema.Extensions) || !schema.RepresentsCompositeType();
 
         private static bool IsClientFlattenUsed(Dictionary<string, object> extensions)
             => extensions.ContainsKey(ClientFlattenExtensionName)
