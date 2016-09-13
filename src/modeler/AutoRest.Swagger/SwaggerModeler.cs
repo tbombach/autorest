@@ -376,24 +376,7 @@ namespace AutoRest.Swagger
 
         public SwaggerParameter Unwrap(SwaggerParameter swaggerParameter)
         {
-            if (swaggerParameter == null)
-            {
-                throw new ArgumentNullException("swaggerParameter");
-            }
-
-            // If referencing global parameters serializationProperty
-            if (swaggerParameter.Reference != null)
-            {
-                string referenceKey = swaggerParameter.Reference.StripParameterPath();
-                if (!ServiceDefinition.Parameters.ContainsKey(referenceKey))
-                {
-                    throw new ArgumentException(
-                        string.Format(CultureInfo.InvariantCulture,
-                        Resources.DefinitionDoesNotExist, referenceKey));
-                }
-
-                swaggerParameter = ServiceDefinition.Parameters[referenceKey];
-            }
+            swaggerParameter = ParameterResolver.Unwrap(swaggerParameter);
 
             // Unwrap the schema if in "body"
             if (swaggerParameter.Schema != null && swaggerParameter.In == ParameterLocation.Body)
@@ -407,6 +390,11 @@ namespace AutoRest.Swagger
         public SchemaResolver Resolver
         {
             get { return new SchemaResolver(this); }
+        }
+
+        public ParameterResolver ParameterResolver
+        {
+            get { return new ParameterResolver(this); }
         }
     }
 }

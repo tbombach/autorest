@@ -169,6 +169,13 @@ namespace AutoRest.Swagger.Tests
             var messages = ValidateSwagger(Path.Combine("Swagger", "Validation", "pageable-no-200-response.json"));
             messages.Any(m => m.Type == typeof(PageableRequires200Response));
         }
+
+        [Fact]
+        public void MultipleBodyParametersValidation()
+        {
+            var messages = ValidateSwagger(Path.Combine("Swagger", "Validation", "multiple-body-parameters.json"));
+            messages.Any(m => m.Type == typeof(PageableRequires200Response));
+        }
     }
 
     #region Positive tests
