@@ -54,6 +54,7 @@ Licensed under the MIT License. See License.txt in the project root for license 
             Modeler = "Swagger";
             ValidationLevel = LogEntrySeverity.Error;
             ModelsName = "Models";
+            Project = false;
         }
 
         /// <summary>
@@ -241,7 +242,7 @@ Licensed under the MIT License. See License.txt in the project root for license 
         [SettingsAlias("cgs")]
         [SettingsInfo("The path for a json file containing code generation settings.")]
         public string CodeGenSettings { get; set; }
-        
+
         /// <summary>
         /// The input validation severity level that will prevent code generation
         /// </summary>
@@ -249,6 +250,14 @@ Licensed under the MIT License. See License.txt in the project root for license 
         [SettingsAlias("validation")]
         [SettingsInfo("The input validation severity level that will prevent code generation")]
         public LogEntrySeverity ValidationLevel { get; set; }
+
+        /// <summary>
+        /// The input validation severity level that will prevent code generation
+        /// </summary>
+        [SettingsAlias("p")]
+        [SettingsAlias("project")]
+        [SettingsInfo("Whether AutoRest should generate a project for the generated files")]
+        public bool Project { get; set; }
 
         /// <summary>
         /// Factory method to generate CodeGenerationSettings from command line arguments.
@@ -369,14 +378,14 @@ Licensed under the MIT License. See License.txt in the project root for license 
                                 var elementType = property.PropertyType.GetElementType();
                                 if (elementType == typeof(string))
                                 {
-                                    var stringArray = ((JArray) setting.Value).Children().
+                                    var stringArray = ((JArray)setting.Value).Children().
                                     Select(
                                         c => c.ToString())
                                     .ToArray();
-  
+
                                     property.SetValue(entityToPopulate, stringArray);
                                 }
-                                else if (elementType == typeof (int))
+                                else if (elementType == typeof(int))
                                 {
                                     var intValues = ((JArray)setting.Value).Children().
                                          Select(c => (int)Convert.ChangeType(c, elementType, CultureInfo.InvariantCulture))
@@ -404,7 +413,7 @@ Licensed under the MIT License. See License.txt in the project root for license 
 
         public void Validate()
         {
-            foreach (PropertyInfo property in (typeof (Settings)).GetProperties())
+            foreach (PropertyInfo property in (typeof(Settings)).GetProperties())
             {
                 // If property value is not set - throw exception.
                 var doc = property.GetCustomAttributes<SettingsInfoAttribute>().FirstOrDefault();
@@ -420,6 +429,18 @@ Licensed under the MIT License. See License.txt in the project root for license 
                 foreach (var unmatchedSetting in CustomSettings.Keys)
                 {
                     Logger.LogWarning(Resources.ParameterIsNotValid, unmatchedSetting);
+                }
+            }
+
+            if (Project)
+            {
+                if (string.IsNullOrEmpty(PackageName))
+                {
+                    Logger.LogError(new ArgumentException("PackageName"), Resources.PackageInfoRequiredForProject, "PackageName");
+                }
+                if (string.IsNullOrEmpty(PackageVersion))
+                {
+                    Logger.LogError(new ArgumentException("PackageVersion"), Resources.PackageInfoRequiredForProject, "PackageVersion");
                 }
             }
             ErrorManager.ThrowErrors();
